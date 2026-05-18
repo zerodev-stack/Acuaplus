@@ -1,0 +1,54 @@
+AcuaPlus Backend Endpoints:
+
+Base URL: /api
+
+Authentication (/api/auth)
+- POST /api/auth/register : Register a new user
+- POST /api/auth/login : Login
+- POST /api/auth/refresh : Refresh token
+- POST /api/auth/logout : Logout
+
+Users (/api/users)
+- GET /api/users/me : Get current user profile (requires token)
+- PATCH /api/users/me : Update current user profile (requires token)
+- GET /api/users/pending-sellers : Get pending seller approvals (requires token, admin)
+- PATCH /api/users/:id/approve : Approve seller (requires token, admin)
+- PATCH /api/users/:id/suspend : Suspend user (requires token, admin)
+
+Categories (/api/categories)
+- GET /api/categories/ : Get all categories
+
+Products (/api/products)
+- GET /api/products/ : Get all products
+- GET /api/products/:id : Get product by ID
+- POST /api/products/ : Create a product (requires token, seller)
+- PATCH /api/products/:id : Update a product (requires token, seller)
+- DELETE /api/products/:id : Delete a product (requires token, seller)
+- POST /api/products/:id/images : Add image to product (requires token, seller)
+- GET /api/products/:id/reviews : Get reviews for a product
+
+Cart (/api/cart)
+- GET /api/cart/ : Get current user cart (requires token)
+- POST /api/cart/items : Add item to cart (requires token)
+- PATCH /api/cart/items/:id : Update cart item (requires token)
+- DELETE /api/cart/items/:id : Remove cart item (requires token)
+
+Orders (/api/orders)
+- POST /api/orders/ : Create an order (requires token, buyer)
+- GET /api/orders/mine : Get current user's orders (requires token)
+- GET /api/orders/seller : Get orders for seller's products (requires token, seller)
+- GET /api/orders/:id : Get order by ID (requires token)
+- PATCH /api/orders/seller-orders/:id/status : Update status of an order item (requires token, seller)
+
+Payments (/api/payments)
+- GET /api/payments/cards : Get saved cards (requires token)
+- POST /api/payments/cards : Save a new card (requires token)
+- POST /api/payments/process : Process a payment (requires token, buyer)
+
+Reviews (/api/reviews)
+- POST /api/reviews/ : Create a review (requires token, buyer)
+- GET /api/reviews/product/:productId : Get reviews for a product
+
+Notifications (/api/notifications)
+- GET /api/notifications/ : Get current user's notifications (requires token)
+- PATCH /api/notifications/:id/read : Mark notification as read (requires token)
