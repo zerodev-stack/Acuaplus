@@ -1,0 +1,77 @@
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+  <div class="card shadow-sm" style="width: 100%; max-width: 420px;">
+
+    <!-- Header de la tarjeta -->
+    <div class="card-body p-4 p-md-5">
+
+      <!-- Logo / título -->
+      <div class="text-center mb-4">
+        <span class="fs-2">💧</span>
+        <h1 class="h4 fw-bold mt-2 mb-1">Acuaplus</h1>
+        <p class="text-muted small">Inicia sesión en tu cuenta</p>
+      </div>
+
+      <!-- Alerta de error -->
+      <div *ngIf="errorMsg" class="alert alert-danger py-2 small" role="alert">
+        {{ errorMsg }}
+      </div>
+
+      <!-- Formulario -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Email -->
+        <div class="mb-3">
+          <label for="email" class="form-label fw-semibold">Correo electrónico</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="form-control"
+            [class.is-invalid]="email.invalid && email.touched"
+            placeholder="correo@ejemplo.com"
+          />
+          <div class="invalid-feedback">
+            <span *ngIf="email.errors?.['required']">El correo es obligatorio</span>
+            <span *ngIf="email.errors?.['email']">Ingresa un correo válido</span>
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="mb-4">
+          <label for="password" class="form-label fw-semibold">Contraseña</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            class="form-control"
+            [class.is-invalid]="password.invalid && password.touched"
+            placeholder="Mínimo 6 caracteres"
+          />
+          <div class="invalid-feedback">
+            <span *ngIf="password.errors?.['required']">La contraseña es obligatoria</span>
+            <span *ngIf="password.errors?.['minlength']">Mínimo 6 caracteres</span>
+          </div>
+        </div>
+
+        <!-- Botón -->
+        <button
+          type="submit"
+          class="btn btn-primary w-100"
+          [disabled]="loading"
+        >
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+          {{ loading ? 'Ingresando...' : 'Iniciar sesión' }}
+        </button>
+
+      </form>
+
+      <!-- Link a registro -->
+      <hr class="my-4">
+      <p class="text-center small mb-0">
+        ¿No tienes cuenta?
+        <a routerLink="/auth/register" class="fw-semibold">Regístrate aquí</a>
+      </p>
+
+    </div>
+  </div>
+</div>
