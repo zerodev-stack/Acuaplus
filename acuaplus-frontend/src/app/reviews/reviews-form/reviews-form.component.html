@@ -1,0 +1,72 @@
+<!-- src/app/reviews/review-form/review-form.component.html -->
+<div class="card border-0 shadow-sm review-form-card">
+  <div class="card-body p-4">
+    <h6 class="fw-bold mb-3">Califica este producto</h6>
+
+    <!-- Éxito -->
+    <div *ngIf="successMsg" class="alert alert-success py-2">
+      <i class="bi bi-check-circle me-1"></i>{{ successMsg }}
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="errorMsg" class="alert alert-danger py-2">
+      <i class="bi bi-exclamation-circle me-1"></i>{{ errorMsg }}
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" *ngIf="!successMsg">
+
+      <!-- Estrellas -->
+      <div class="mb-3">
+        <label class="form-label text-muted small">Tu calificación *</label>
+        <div class="star-selector d-flex gap-1">
+          <button
+            *ngFor="let star of [1,2,3,4,5]"
+            type="button"
+            class="btn-star"
+            [class.filled]="star <= (hoveredStar || rating)"
+            (mouseenter)="hoveredStar = star"
+            (mouseleave)="hoveredStar = 0"
+            (click)="setRating(star)"
+            [title]="star + ' estrella' + (star > 1 ? 's' : '')">
+            <i class="bi" [ngClass]="star <= (hoveredStar || rating) ? 'bi-star-fill' : 'bi-star'"></i>
+          </button>
+          <span class="ms-2 text-muted small align-self-center" *ngIf="rating > 0">
+            {{ ['', 'Muy malo', 'Malo', 'Regular', 'Bueno', 'Excelente'][rating] }}
+          </span>
+        </div>
+        <div *ngIf="form.get('rating')?.touched && rating === 0"
+             class="text-danger small mt-1">
+          Selecciona al menos una estrella.
+        </div>
+      </div>
+
+      <!-- Comentario -->
+      <div class="mb-3">
+        <label class="form-label text-muted small">Comentario (opcional)</label>
+        <textarea
+          formControlName="comment"
+          class="form-control"
+          rows="3"
+          placeholder="¿Qué te pareció el producto?"
+          maxlength="500">
+        </textarea>
+        <div class="text-end">
+          <small class="text-muted">{{ commentLength }}/500</small>
+        </div>
+        <div *ngIf="form.get('comment')?.errors?.['maxlength']"
+             class="text-danger small">
+          Máximo 500 caracteres.
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary w-100"
+        [disabled]="submitting">
+        <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
+        {{ submitting ? 'Enviando...' : 'Enviar calificación' }}
+      </button>
+
+    </form>
+  </div>
+</div>
