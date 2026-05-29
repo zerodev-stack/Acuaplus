@@ -1,1 +1,174 @@
-<p>register works!</p>
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light py-4">
+  <div class="card shadow-sm" style="width: 100%; max-width: 480px;">
+    <div class="card-body p-4 p-md-5">
+
+      <!-- Título -->
+      <div class="text-center mb-4">
+        <span class="fs-2">💧</span>
+        <h1 class="h4 fw-bold mt-2 mb-1">Crear cuenta</h1>
+        <p class="text-muted small">Únete a Acuaplus</p>
+      </div>
+
+      <!-- Alerta de error -->
+      <div *ngIf="errorMsg" class="alert alert-danger py-2 small">{{ errorMsg }}</div>
+
+      <!-- Alerta de éxito (para vendedores pendientes) -->
+      <div *ngIf="successMsg" class="alert alert-success small">
+        <i class="bi bi-check-circle me-1"></i> {{ successMsg }}
+        <div class="mt-2">
+          <a routerLink="/auth/login" class="btn btn-sm btn-success">Ir al inicio de sesión</a>
+        </div>
+      </div>
+
+      <!-- Formulario (se oculta si hubo éxito) -->
+      <form *ngIf="!successMsg" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Nombre -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Nombre completo</label>
+          <input
+            type="text"
+            formControlName="name"
+            class="form-control"
+            [class.is-invalid]="name.invalid && name.touched"
+            placeholder="Tu nombre"
+          />
+          <div class="invalid-feedback">
+            <span *ngIf="name.errors?.['required']">El nombre es obligatorio</span>
+            <span *ngIf="name.errors?.['minlength']">Mínimo 2 caracteres</span>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Correo electrónico</label>
+          <input
+            type="email"
+            formControlName="email"
+            class="form-control"
+            [class.is-invalid]="email.invalid && email.touched"
+            placeholder="correo@ejemplo.com"
+          />
+          <div class="invalid-feedback">
+            <span *ngIf="email.errors?.['required']">El correo es obligatorio</span>
+            <span *ngIf="email.errors?.['email']">Correo no válido</span>
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Contraseña</label>
+          <input
+            type="password"
+            formControlName="password"
+            class="form-control"
+            [class.is-invalid]="password.invalid && password.touched"
+            placeholder="Mínimo 6 caracteres"
+          />
+          <div class="invalid-feedback">
+            <span *ngIf="password.errors?.['required']">La contraseña es obligatoria</span>
+            <span *ngIf="password.errors?.['minlength']">Mínimo 6 caracteres</span>
+          </div>
+        </div>
+
+        <!-- Teléfono (opcional) -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">
+            Teléfono <span class="text-muted fw-normal">(opcional)</span>
+          </label>
+          <input
+            type="tel"
+            formControlName="phone"
+            class="form-control"
+            placeholder="Ej: 3001234567"
+          />
+        </div>
+
+        <!-- Tipo de cuenta -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Tipo de cuenta</label>
+          <div class="d-flex gap-3">
+
+            <div
+              class="flex-fill border rounded-3 p-3 text-center"
+              [class.border-primary]="role.value === 'buyer'"
+              [class.bg-primary]="role.value === 'buyer'"
+              [class.bg-opacity-10]="role.value === 'buyer'"
+              style="cursor: pointer;"
+              (click)="form.get('role')!.setValue('buyer')"
+            >
+              <div class="fs-4">🛒</div>
+              <div class="fw-semibold small mt-1">Comprador</div>
+              <div class="text-muted" style="font-size: 0.72rem;">Compra productos</div>
+            </div>
+
+            <div
+              class="flex-fill border rounded-3 p-3 text-center"
+              [class.border-primary]="role.value === 'seller'"
+              [class.bg-primary]="role.value === 'seller'"
+              [class.bg-opacity-10]="role.value === 'seller'"
+              style="cursor: pointer;"
+              (click)="form.get('role')!.setValue('seller')"
+            >
+              <div class="fs-4">🏪</div>
+              <div class="fw-semibold small mt-1">Vendedor</div>
+              <div class="text-muted" style="font-size: 0.72rem;">Publica productos</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Campos extra para vendedor (aparecen dinámicamente) -->
+        <div *ngIf="isSeller" class="border rounded-3 p-3 mb-3 bg-light">
+          <p class="small fw-semibold text-muted mb-3">
+            <i class="bi bi-info-circle me-1"></i>
+            Datos del negocio
+          </p>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre del negocio</label>
+            <input
+              type="text"
+              formControlName="business_name"
+              class="form-control"
+              [class.is-invalid]="business_name.invalid && business_name.touched"
+              placeholder="Ej: Agua Pura S.A.S"
+            />
+            <div class="invalid-feedback">El nombre del negocio es obligatorio</div>
+          </div>
+
+          <div class="mb-1">
+            <label class="form-label fw-semibold">NIT</label>
+            <input
+              type="text"
+              formControlName="nit"
+              class="form-control"
+              [class.is-invalid]="nit.invalid && nit.touched"
+              placeholder="Ej: 900123456-1"
+            />
+            <div class="invalid-feedback">El NIT es obligatorio</div>
+          </div>
+        </div>
+
+        <!-- Botón submit -->
+        <button
+          type="submit"
+          class="btn btn-primary w-100 mt-2"
+          [disabled]="loading"
+        >
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+          {{ loading ? 'Registrando...' : 'Crear cuenta' }}
+        </button>
+
+      </form>
+
+      <!-- Link al login -->
+      <hr class="my-4">
+      <p class="text-center small mb-0">
+        ¿Ya tienes cuenta?
+        <a routerLink="/auth/login" class="fw-semibold">Inicia sesión</a>
+      </p>
+
+    </div>
+  </div>
+</div>
