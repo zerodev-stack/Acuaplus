@@ -14,8 +14,8 @@ export const getUserNotifications = async (userId: number, page = 1, limit = 20)
     `SELECT * FROM notifications
      WHERE user_id = ? AND (expires_at IS NULL OR expires_at > NOW())
      ORDER BY created_at DESC
-     LIMIT ? OFFSET ?`,
-    [userId, limit, offset]
+     LIMIT ${limit} OFFSET ${offset}`,
+    [userId]
   );
 
   const unreadCount = await query<{ count: number }[]>(

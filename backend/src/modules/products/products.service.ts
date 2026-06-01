@@ -144,15 +144,16 @@ export const listProducts = async (filters: {
   const total = countResult[0].total;
 
   const products = await query<(ProductRow & { category_name: string; seller_name: string })[]>(
-    `SELECT p.*, c.name as category_name, sp.business_name as seller_name
-     FROM products p
-     JOIN categories c ON c.id = p.category_id
-     JOIN seller_profiles sp ON sp.id = p.seller_id
-     ${where}
-     ORDER BY ${orderBy}
-     LIMIT ? OFFSET ?`,
-    [...params, limit, offset]
-  );
+  `SELECT p.*, c.name as category_name, sp.business_name as seller_name
+   FROM products p
+   JOIN categories c ON c.id = p.category_id
+   JOIN seller_profiles sp ON sp.id = p.seller_id
+   ${where}
+   ORDER BY ${orderBy}
+   LIMIT ${limit} OFFSET ${offset}`,
+  // ✅ Solo los parámetros de negocio, sin limit/offset
+  params
+);
 
   const productIds = products.map(p => p.id);
 

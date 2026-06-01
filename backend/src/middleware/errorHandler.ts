@@ -8,6 +8,7 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction
 ): void => {
+  console.error('🔴 ERROR COMPLETO:', err.message, '\nSTACK:', err.stack);
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
       error: {

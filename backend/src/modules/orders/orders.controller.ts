@@ -29,6 +29,8 @@ export const getMine = async (req: Request, res: Response, next: NextFunction) =
     const result = await ordersService.getMyOrders(req.user!.userId, req.query as any);
     res.json(result);
   } catch (error) {
+    console.log('Error en getMine:', error);
+    console.log('STACK:', (error as any).stack);
     next(error);
   }
 };
