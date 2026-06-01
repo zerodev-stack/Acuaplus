@@ -32,32 +32,38 @@ export interface ProductFilters {
   limit?: number;
 }
 
+export interface ProductFilters {
+  search?: string;
+  category_id?: number;   // ← cambia de category: string a category_id: number
+  min_price?: number;
+  max_price?: number;
+  page?: number;
+  limit?: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ProductService {
 
   // Categorías del marketplace de Acuaplus
-  readonly categories = [
-    { value: '',            label: 'Todas las categorías' },
-    { value: 'piscicultura', label: '🐟 Piscicultura' },
-    { value: 'camaronicultura', label: '🦐 Camaronicultura' },
-    { value: 'bovinos',    label: '🐄 Bovinos' },
-    { value: 'porcinos',   label: '🐖 Porcinos' },
-    { value: 'avicultura', label: '🐔 Avicultura' },
-    { value: 'hortalizas', label: '🥦 Hortalizas' },
-    { value: 'frutas',     label: '🍋 Frutas' },
-    { value: 'lacteos',    label: '🥛 Lácteos' },
-    { value: 'otros',      label: '📦 Otros' },
-  ];
+  // readonly categories = [
+  //   { value: '',            label: 'Todas las categorías' },
+  //   { value: 'piscicultura', label: '🐟 Piscicultura' },
+  //   { value: 'camaronicultura', label: '🦐 Camaronicultura' },
+  //   { value: 'bovinos',    label: '🐄 Bovinos' },
+  //   { value: 'porcinos',   label: '🐖 Porcinos' },
+  //   { value: 'avicultura', label: '🐔 Avicultura' },
+  //   { value: 'hortalizas', label: '🥦 Hortalizas' },
+  //   { value: 'frutas',     label: '🍋 Frutas' },
+  //   { value: 'lacteos',    label: '🥛 Lácteos' },
+  //   { value: 'otros',      label: '📦 Otros' },
+  // ];
 
   constructor(private api: ApiService) {}
 
   getProducts(filters: ProductFilters = {}) {
     // Construir query string con los filtros
     const params = new URLSearchParams();
-    if (filters.search)   params.set('search',   filters.search);
-    if (filters.category) params.set('category', filters.category);
-    if (filters.minPrice) params.set('minPrice', String(filters.minPrice));
-    if (filters.maxPrice) params.set('maxPrice', String(filters.maxPrice));
+    if (filters.category_id) params.set('category_id', String(filters.category_id));
     params.set('page',  String(filters.page  ?? 1));
     params.set('limit', String(filters.limit ?? 12));
 

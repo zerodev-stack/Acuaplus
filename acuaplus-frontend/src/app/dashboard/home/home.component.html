@@ -196,7 +196,7 @@
             <p class="fw-semibold mb-2" style="font-size: 0.9rem;">
               {{ user?.role === 'seller' ? 'Publicar producto' : 'Ver catálogo' }}
             </p>
-            <button class="btn btn-light btn-sm text-primary fw-semibold">
+            <button class="btn btn-light btn-sm text-primary fw-semibold" (click)="goToCatalog()">
               <i class="bi bi-arrow-right me-1"></i> Ir
             </button>
           </div>
@@ -222,7 +222,7 @@
               <a href="#" class="list-group-item list-group-item-action d-flex gap-3 py-3">
                 <span class="fs-4">🔍</span>
                 <div>
-                  <div class="fw-semibold">Explorar el catálogo</div>
+                  <div class="fw-semibold"> Explorar el catálogo</div>
                   <div class="text-muted small">Encuentra productos de agua y acuicultura</div>
                 </div>
                 <i class="bi bi-chevron-right ms-auto text-muted"></i>

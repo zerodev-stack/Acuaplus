@@ -1,6 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
 import { ProductService, Product } from '../../core/services/product.service';
 
 @Component({
@@ -8,128 +6,55 @@ import { ProductService, Product } from '../../core/services/product.service';
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit, OnDestroy {
-
+export class ProductListComponent implements OnInit {
   products: Product[] = [];
   loading = true;
-  error = '';
+  error = false;
+  selectedCategoryId: number | null = null;
 
   // Paginación
   currentPage = 1;
   totalPages = 1;
-  totalProducts = 0;
-  readonly pageSize = 12;
+  total = 0;
+  readonly limit = 12;
 
-  // Formulario de filtros
-  filterForm: FormGroup;
+  constructor(private productService: ProductService) {}
 
-  // Para cancelar suscripciones al destruir el componente
-  private destroy$ = new Subject<void>();
-
-  // Toast de carrito
-  cartToast = '';
-
-  constructor(
-    private productService: ProductService,
-    private fb: FormBuilder
-  ) {
-    this.filterForm = this.fb.group({
-      search:   [''],
-      category: [''],
-      minPrice: [''],
-      maxPrice: [''],
-    });
-  }
-
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadProducts();
-
-    // Buscar automáticamente al escribir (con 400ms de espera)
-    this.filterForm.get('search')!.valueChanges.pipe(
-      debounceTime(400),
-      distinctUntilChanged(),
-      takeUntil(this.destroy$)
-    ).subscribe(() => {
-      this.currentPage = 1;
-      this.loadProducts();
-    });
-
-    // Aplicar filtros al cambiar categoría
-    this.filterForm.get('category')!.valueChanges.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(() => {
-      this.currentPage = 1;
-      this.loadProducts();
-    });
   }
 
-  loadProducts() {
-    this.loading = true;
-    this.error = '';
+  onCategorySelected(categoryId: number | null): void {
+    this.selectedCategoryId = categoryId;
+    this.currentPage = 1; // resetear paginación al cambiar filtro
+    this.loadProducts();
+  }
 
-    const { search, category, minPrice, maxPrice } = this.filterForm.value;
+  loadProducts(): void {
+    this.loading = true;
+    this.error = false;
 
     this.productService.getProducts({
-      search:   search   || undefined,
-      category: category || undefined,
-      minPrice: minPrice ? Number(minPrice) : undefined,
-      maxPrice: maxPrice ? Number(maxPrice) : undefined,
-      page:     this.currentPage,
-      limit:    this.pageSize
+      category_id: this.selectedCategoryId ?? undefined,
+      page: this.currentPage,
+      limit: this.limit
     }).subscribe({
       next: (res) => {
-        this.products     = res.data;
-        this.totalProducts = res.total;
-        this.totalPages    = res.totalPages;
+        this.products = res.data;
+        this.total = res.total;
+        this.totalPages = res.totalPages;
         this.loading = false;
       },
       error: () => {
-        this.error = 'No se pudieron cargar los productos. Intenta de nuevo más tarde.';
+        this.error = true;
         this.loading = false;
       }
     });
   }
 
-  applyPriceFilter() {
-    this.currentPage = 1;
-    this.loadProducts();
-  }
-
-  clearFilters() {
-    this.filterForm.reset({ search: '', category: '', minPrice: '', maxPrice: '' });
-    this.currentPage = 1;
-    this.loadProducts();
-  }
-
-  goToPage(page: number) {
+  goToPage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     this.loadProducts();
-    // Scroll arriba al cambiar página
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // Arreglo de páginas para mostrar en la paginación
-  get pageNumbers(): number[] {
-    const pages: number[] = [];
-    const start = Math.max(1, this.currentPage - 2);
-    const end   = Math.min(this.totalPages, this.currentPage + 2);
-    for (let i = start; i <= end; i++) pages.push(i);
-    return pages;
-  }
-
-  onAddToCart(product: Product) {
-    // Por ahora muestra un toast — en el siguiente módulo lo conectamos al carrito real
-    this.cartToast = `"${product.name}" agregado al carrito`;
-    setTimeout(() => this.cartToast = '', 3000);
-  }
-
-  get categories() {
-    return this.productService.categories;
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
