@@ -42,7 +42,12 @@ export class LoginComponent {
 
     this.authService.login(email, password).subscribe({
       next: () => {
+       const user = this.authService.currentUser;
+       if (user?.role === 'admin') {
+        this.router.navigate(['/admin']);
+       } else {
         this.router.navigate(['/dashboard']);
+       }
       },
       error: (err) => {
         this.loading = false;
