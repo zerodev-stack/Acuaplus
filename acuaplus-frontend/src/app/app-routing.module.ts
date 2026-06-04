@@ -27,6 +27,11 @@ const routes: Routes = [
   {
     path: '**',
     redirectTo: '/dashboard'
+  },
+  { 
+    path: 'notifications',
+    loadChildren: () => import('./notifications/notifications.module').then(m => m.NotificationsModule),
+    canActivate: [AuthGuard]
   }
 ];
 
