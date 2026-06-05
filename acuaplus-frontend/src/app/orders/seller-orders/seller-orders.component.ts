@@ -154,4 +154,8 @@ export class SellerOrdersComponent implements OnInit {
       style: 'currency', currency: 'COP', maximumFractionDigits: 0
     }).format(price);
   }
+
+  get updatingOrder(): SellerOrder | undefined {
+  return this.orders.find(o => o.id === this.updatingId);
+}
 }

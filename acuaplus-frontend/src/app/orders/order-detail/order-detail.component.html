@@ -27,7 +27,7 @@
           <div>
             <h5 class="fw-bold mb-1">Orden #{{ order.id }}</h5>
             <p class="text-muted small mb-0">
-              { order.created_at }
+              {{ order.created_at | date: "mm/dd/yyyy "}}
             </p>
           </div>
           <div class="text-end">

@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { OrdersRoutingModule } from './orders-routing.module';
-import { OrdersListComponent } from './orders-list/orders-list.component';
+import { OrderListComponent } from './order-list/orders-list.component';
 import { OrderDetailComponent } from './order-detail/order-detail.component';
 import { SellerOrdersComponent } from './seller-orders/seller-orders.component';
 
 @NgModule({
   declarations: [
-    OrdersListComponent,
+    OrderListComponent,
     OrderDetailComponent,
     SellerOrdersComponent
   ],

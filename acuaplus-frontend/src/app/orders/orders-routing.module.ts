@@ -1,14 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { RoleGuard } from '../core/guards/role.guard';
-import { OrdersListComponent } from './orders-list/orders-list.component';
+import { OrderListComponent } from './order-list/orders-list.component';
 import { OrderDetailComponent } from './order-detail/order-detail.component';
 import { SellerOrdersComponent } from './seller-orders/seller-orders.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: OrdersListComponent  // buyers ven sus órdenes
+    component: OrderListComponent  // buyers ven sus órdenes
   },
   {
     path: 'seller',
