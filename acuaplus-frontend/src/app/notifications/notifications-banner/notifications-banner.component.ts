@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { NotificationService, Notification } from '../../core/services/notifications.service';
 
 @Component({
-  selector: 'app-notifications-list',
-  templateUrl: './notifications-list.component.html',
-  styleUrls: ['./notifications-list.component.css']
+  selector: 'app-notifications-banner',
+  templateUrl: './notifications-banner.component.html',
+  styleUrls: ['./notifications-banner.component.css']
 })
-export class NotificationsListComponent implements OnInit {
+export class NotificationsBannerComponent implements OnInit {
   notifications: Notification[] = [];
   unreadCount = 0;
   total = 0;

@@ -28,10 +28,10 @@ export class NotificationService {
   constructor(private api: ApiService) {}
  
   getNotifications(page = 1, limit = 20) {
-    return this.api.get<NotificationsResponse>(`/notifications?page=${page}&limit=${limit}`);
+    return this.api.get<NotificationsResponse>(`notifications?page=${page}&limit=${limit}`);
   }
  
   markAsRead(id: number) {
-    return this.api.patch<{ data: { message: string } }>(`/notifications/${id}/read`, {});
+    return this.api.patch<{ data: { message: string } }>(`notifications/${id}/read`, {});
   }
 }

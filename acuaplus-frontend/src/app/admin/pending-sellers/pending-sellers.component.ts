@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../core/services/user.service';
-import { User } from '../../core/services/auth.service';
+import { AuthService, User } from '../../core/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-pending-sellers',
@@ -14,20 +15,32 @@ export class PendingSellersComponent implements OnInit {
   actionLoading: { [userId: number]: boolean } = {};
   actionSuccess: { [userId: number]: string } = {};
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private authService: AuthService,
+    private router: Router,
+  ) {
+    this.authService.currentUser;
+  }
 
   ngOnInit(): void {
+    console.log('Cargando vendedores pendientes de aprobación...');
     this.loadPendingSellers();
   }
   loadPendingSellers(): void {
     this.loading = true;
     this.error = false;
+
+    console.log('Llamando al servicio getPendingSellers()');
+
     this.userService.getPendingSellers().subscribe({
-      next: (res) => {
-        this.sellers = res.data;
+      next: (res: any) => {
+        console.log('Respuesta del backend:', res);
+        this.sellers = Array.isArray(res) ? res : (res.data ?? []);
         this.loading = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error cargando pending sellers:', err);
         this.error = true;
         this.loading = false;
       },
@@ -65,5 +78,8 @@ export class PendingSellersComponent implements OnInit {
         this.actionLoading[userId] = false;
       },
     });
+  }
+  logout(): void {
+    this.authService.logout();
   }
 }

@@ -1,12 +1,30 @@
-<div class="container py-4">
-  <h4 class="fw-bold mb-3">Catálogo de productos</h4>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+<div class="container">
+  <span><a routerLink="/admin" class="btn btn-link ps-0 mb-3">
+    <button class="btn btn-outline-light btn-sm"><i class="bi bi-arrow-left me-1"></i>Volver al panel</button>
+    
+  </a></span>
+    <span class="navbar-brand fw-bold"> <h4 class="fw-bold mb-3">Catálogo de productos</h4></span>
+    <div class="d-flex align-items-center gap-3">
+        <!-- <span class="text-white small">{{user?.name}}</span> -->
+        <button class="btn btn-outline-light btn-sm" (click)="logout()">
+            <i class="bi bi-box-arrow-right me-1"></i> Salir
+        </button>
+    </div>
+</div>
+</nav>
 
-  <!-- Filtro de categorías -->
+<div class="container py-4">
+  <h4 class="fw-bold mb-3">Encuentra tu producto ideal</h4>
+
   <app-category-filter
     (categorySelected)="onCategorySelected($event)">
   </app-category-filter>
 
-  <!-- Error -->
+  <div *ngIf="cartMessage" class="alert alert-success py-2 small">
+    {{ cartMessage }}
+  </div>
+
   <div *ngIf="error" class="alert alert-warning d-flex align-items-center gap-2">
     <i class="bi bi-exclamation-triangle"></i>
     No se pudieron cargar los productos.
@@ -15,7 +33,6 @@
     </button>
   </div>
 
-  <!-- Skeleton loader -->
   <div *ngIf="loading" class="row g-3">
     <div *ngFor="let i of [1,2,3,4,5,6]" class="col-6 col-md-4 col-lg-3">
       <div class="card border-0 shadow-sm">
@@ -30,24 +47,23 @@
     </div>
   </div>
 
-  <!-- Grid de productos -->
   <div *ngIf="!loading && !error">
     <p class="text-muted small mb-3">{{ total }} producto(s) encontrado(s)</p>
 
-    <!-- Sin resultados -->
     <div *ngIf="products.length === 0" class="text-center py-5">
       <i class="bi bi-box-seam fs-1 text-muted"></i>
       <p class="text-muted mt-2">No hay productos en esta categoría.</p>
     </div>
 
-    <!-- Cards -->
     <div *ngIf="products.length > 0" class="row g-3">
       <div *ngFor="let product of products" class="col-6 col-md-4 col-lg-3">
-        <app-product-card [product]="product"></app-product-card>
+        <app-product-card
+          [product]="product"
+          (addToCart)="onAddToCart($event)">
+        </app-product-card>
       </div>
     </div>
 
-    <!-- Paginación -->
     <nav *ngIf="totalPages > 1" class="mt-4 d-flex justify-content-center">
       <ul class="pagination">
         <li class="page-item" [class.disabled]="currentPage === 1">

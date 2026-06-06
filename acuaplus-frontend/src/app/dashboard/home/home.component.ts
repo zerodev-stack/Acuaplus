@@ -13,7 +13,6 @@ export class HomeComponent implements OnInit {
   user: User | null = null;
   loadingStats = true;
 
-  // Stats que se muestran en las cards
   stats = {
     products: 0,
     orders: 0,
@@ -31,10 +30,9 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Obtener el usuario actual
     this.user = this.authService.currentUser;
 
-    // Cargar estadísticas según el rol
+
     this.loadStats();
   }
 
@@ -42,7 +40,6 @@ export class HomeComponent implements OnInit {
     this.loadingStats = true;
     this.statsError = false;
 
-    // Cargar notificaciones (aplica para todos los roles)
     this.apiService.get<any>('/notifications?limit=1').subscribe({
       next: (res) => {
         this.stats.notifications = res.total || 0;
@@ -55,7 +52,7 @@ export class HomeComponent implements OnInit {
       }
     });
 
-    // Si es vendedor, cargar sus órdenes y productos
+
     if (this.user?.role === 'seller') {
       this.apiService.get<any>('/orders/seller?limit=1').subscribe({
         next: (res) => { this.stats.orders = res.total || 0; }
@@ -65,7 +62,7 @@ export class HomeComponent implements OnInit {
       });
     }
 
-    // Si es comprador, cargar sus órdenes
+
     if (this.user?.role === 'buyer') {
       this.apiService.get<any>('/orders/mine?limit=1').subscribe({
         next: (res) => { this.stats.orders = res.total || 0; }
@@ -85,7 +82,7 @@ export class HomeComponent implements OnInit {
     return 'Buenas noches';
   }
 
-  // Etiqueta del rol en español
+
   get roleLabel(): string {
     const labels: Record<string, string> = {
       buyer:  ' Comprador',

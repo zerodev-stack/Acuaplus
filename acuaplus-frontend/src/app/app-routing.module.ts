@@ -17,6 +17,11 @@ const routes: Routes = [
     path: 'dashboard',loadChildren: () => import ('./dashboard/dashboard.module').then(m => m.DashboardModule),canActivate: [AuthGuard]
   },
   {
+  path: 'orders',
+  loadChildren: () => import('./orders/orders.module').then(m => m.OrdersModule),
+  canActivate: [AuthGuard]
+},
+  {
     path: 'catalog', loadChildren: () => import ('./catalog/catalog.module').then(m => m.CatalogModule), canActivate: [AuthGuard] 
   },
   {
@@ -24,15 +29,20 @@ const routes: Routes = [
     loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),canActivate: [AuthGuard, RoleGuard],
     data: {roles: ['admin']}
   },
-  {
-    path: '**',
-    redirectTo: '/dashboard'
-  },
+ 
   { 
     path: 'notifications',
     loadChildren: () => import('./notifications/notifications.module').then(m => m.NotificationsModule),
     canActivate: [AuthGuard]
-  }
+  },
+  {
+    path: 'cart',
+    loadChildren: () => import('./cart/cart.module').then(m => m.CartModule),canActivate: [AuthGuard]
+  },
+   {
+    path: '**',
+    redirectTo: '/dashboard'
+  },
 ];
 
 @NgModule({

@@ -44,7 +44,7 @@ export class AuthService {
   }
 
   login(email: string, password: string) {
-    return this.api.post<LoginResponse>('/auth/login', { email, password }).pipe(
+    return this.api.post<LoginResponse>('auth/login', { email, password }).pipe(
       tap(response => {
         const { user, accessToken } = response.data;
         // Guardar token y usuario en localStorage
@@ -64,12 +64,12 @@ export class AuthService {
     business_name?: string;
     nit?: string;
   }) {
-    return this.api.post<RegisterResponse>('/auth/register', data);
+    return this.api.post<RegisterResponse>('auth/register', data);
   }
 
   logout() {
     // Llamar al endpoint de logout en la API
-    this.api.post('/auth/logout', {}).subscribe({
+    this.api.post('auth/logout', {}).subscribe({
       complete: () => this.clearSession()
     });
   }

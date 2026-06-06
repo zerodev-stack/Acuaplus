@@ -34,11 +34,11 @@ export class ReviewService {
 
   getProductReviews(productId: number, page = 1, limit = 10) {
     return this.api.get<ReviewsResponse>(
-      `/reviews/product/${productId}?page=${page}&limit=${limit}`
+      `reviews/product/${productId}?page=${page}&limit=${limit}`
     );
   }
 
   createReview(payload: CreateReviewPayload) {
-    return this.api.post<{ data: Review }>('/reviews', payload);
+    return this.api.post<{ data: Review }>('reviews', payload);
   }
 }

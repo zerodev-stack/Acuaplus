@@ -18,13 +18,13 @@ export class UserService {
 
   constructor(private api: ApiService) { }
 
-  getPendingSellers(): Observable<{data: User[]}> {
-    return this.api.get<{data: User[]}>('users/pending-sellers');
-  }
+  getPendingSellers(): Observable<User[]> {
+  return this.api.get<User[]>('users/pending-sellers');
+}
   approveSeller(userId: number): Observable<any> {
-    return this.api.patch(`users/${userId}/approve`, {});
+    return this.api.patch(`/users/${userId}/approve`, {});
   }
   suspendUser(userId: number): Observable<any> {
-    return this.api.patch(`users/${userId}/suspend`, {});
+    return this.api.patch(`/users/${userId}/suspend`, {});
   }
 }

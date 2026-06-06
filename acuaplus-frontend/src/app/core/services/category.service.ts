@@ -18,6 +18,6 @@ export class CategoryService {
   constructor(private apiService: ApiService) { }
 
   getCategories(): Observable<{data: Category[]}> {
-    return this.apiService.get<{data: Category[]}>('/categories');
+    return this.apiService.get<{data: Category[]}>('categories');
   }
 }

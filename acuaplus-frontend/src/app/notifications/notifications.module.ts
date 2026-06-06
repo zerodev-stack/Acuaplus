@@ -2,14 +2,14 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-import { NotificationsListComponent } from './notifications-banner/notifications-banner.component';
+import { NotificationsBannerComponent } from './notifications-banner/notifications-banner.component';
 
 const routes: Routes = [
-  { path: '', component: NotificationsListComponent }
+  { path: '', component: NotificationsBannerComponent }
 ];
 
 @NgModule({
-  declarations: [NotificationsListComponent],
+  declarations: [NotificationsBannerComponent],
   imports: [
     CommonModule,
     RouterModule.forChild(routes)

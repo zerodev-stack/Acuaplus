@@ -1,0 +1,105 @@
+<div class="container py-4" style="max-width: 720px;">
+  <button class="btn btn-link ps-0 mb-3" (click)="location.back()" >
+    <i class="bi bi-arrow-left me-1"></i>Volver
+  </button>
+
+  <!-- Skeleton -->
+  <div *ngIf="loading" class="card border-0 shadow-sm">
+    <div class="card-body placeholder-glow">
+      <span class="placeholder col-4 d-block mb-3" style="height:1.5rem"></span>
+      <span class="placeholder col-6 d-block mb-2"></span>
+      <span class="placeholder col-3 d-block mb-2"></span>
+      <span class="placeholder col-5 d-block"></span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error && !loading" class="alert alert-warning">
+    No se pudo cargar la orden.
+  </div>
+
+  <!-- Detalle -->
+  <ng-container *ngIf="order && !loading">
+    <!-- Cabecera -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+          <div>
+            <h5 class="fw-bold mb-1">Orden #{{ order.id }}</h5>
+            <p class="text-muted small mb-0">
+              {{ order.created_at | date: "mm/dd/yyyy "}}
+            </p>
+          </div>
+          <div class="text-end">
+            <p class="fw-bold fs-5 mb-1">{{ formatPrice(order.total_amount) }}</p>
+            <span class="small fw-semibold {{ paymentClass(order.payment_status) }}">
+              <i class="bi bi-credit-card me-1"></i>{{ paymentLabel(order.payment_status) }}
+            </span>
+          </div>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="row g-2 small text-muted">
+          <div class="col-12 col-md-6">
+            <i class="bi bi-geo-alt me-1"></i>
+            <strong>Dirección:</strong> {{ order.shipping_address }}
+          </div>
+          <div class="col-12 col-md-6">
+            <i class="bi bi-credit-card me-1"></i>
+            <strong>Método de pago:</strong> {{ order.payment_method }}
+          </div>
+          <div *ngIf="order.notes" class="col-12">
+            <i class="bi bi-chat-left-text me-1"></i>
+            <strong>Notas:</strong> {{ order.notes }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub-órdenes por vendedor -->
+    <div *ngFor="let so of order.seller_orders" class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-2">
+        <span class="fw-semibold small">
+          <i class="bi bi-shop me-1"></i>{{ so.business_name }}
+        </span>
+        <span class="badge {{ statusClass(so.status) }}" style="font-size:0.72rem">
+          {{ statusLabel(so.status) }}
+        </span>
+      </div>
+      <div class="card-body py-2">
+        <!-- Items -->
+        <div *ngIf="so.items && so.items.length > 0">
+          <div *ngFor="let item of so.items"
+               class="d-flex justify-content-between align-items-center py-2 border-bottom">
+            <div class="small">
+              <p class="mb-0 fw-semibold">Producto #{{ item.product_id }}</p>
+              <p class="text-muted mb-0">
+                {{ item.quantity }} × {{ formatPrice(item.unit_price) }}
+              </p>
+            </div>
+            <span class="small fw-semibold">{{ formatPrice(item.subtotal) }}</span>
+          </div>
+        </div>
+
+        <!-- Tracking -->
+        <div *ngIf="so.tracking_code" class="mt-2 small text-muted">
+          <i class="bi bi-truck me-1"></i>
+          <strong>Tracking:</strong> {{ so.tracking_code }}
+        </div>
+
+        <div class="text-end mt-2">
+          <span class="small fw-semibold">Subtotal: {{ formatPrice(so.subtotal) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total final -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Total de la orden</span>
+        <span class="fw-bold fs-5">{{ formatPrice(order.total_amount) }}</span>
+      </div>
+    </div>
+  </ng-container>
+</div>

@@ -34,7 +34,7 @@ export interface ProductFilters {
 
 export interface ProductFilters {
   search?: string;
-  category_id?: number;   // ← cambia de category: string a category_id: number
+  category_id?: number;
   min_price?: number;
   max_price?: number;
   page?: number;
@@ -68,10 +68,10 @@ export class ProductService {
     params.set('limit', String(filters.limit ?? 12));
 
     const query = params.toString();
-    return this.api.get<ProductsResponse>(`/products?${query}`);
+    return this.api.get<ProductsResponse>(`products?${query}`);
   }
 
   getProductById(id: number) {
-    return this.api.get<{ data: Product }>(`/products/${id}`);
+    return this.api.get<{ data: Product }>(`products/${id}`);
   }
 }

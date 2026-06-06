@@ -17,6 +17,6 @@ logout():void {
   this.authService.logout();
 }
 goTo(path: string): void {
-  this.router.navigate(['/admin, path']);
+  this.router.navigate(['admin/pending-sellers']);
 }
 }
