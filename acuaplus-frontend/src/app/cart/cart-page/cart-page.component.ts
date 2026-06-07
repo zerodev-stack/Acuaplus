@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Cart, CartItem, CartService } from '../../core/services/cart.service';
 
+
+
 @Component({
   selector: 'app-cart-page',
   templateUrl: './cart-page.component.html',
@@ -34,13 +36,29 @@ export class CartPageComponent implements OnInit {
     });
   }
 
-  updateQuantity(item: CartItem, quantity: number): void {
-    if (quantity < 1) return;
+  // Convierte el string "25000.00" a número y multiplica por cantidad
+  getSubtotal(item: CartItem): number {
+    return parseFloat(item.price) * item.quantity;
+  }
+
+  // Suma todos los subtotales
+  getTotal(): number {
+    if (!this.cart) return 0;
+    return this.cart.items.reduce((acc, item) => acc + this.getSubtotal(item), 0);
+  }
+
+  updateQuantity(item: CartItem, newQuantity: number): void {
+    if (newQuantity < 1) return;
     this.updatingItem[item.id] = true;
 
-    this.cartService.updateItem(item.id, quantity).subscribe({
-      next: () => this.loadCart(),
-      error: () => this.updatingItem[item.id] = false
+    this.cartService.updateItem(item.id, newQuantity).subscribe({
+      next: () => {
+        this.updatingItem[item.id] = false;
+        this.loadCart();
+      },
+      error: () => {
+        this.updatingItem[item.id] = false;
+      }
     });
   }
 
@@ -48,8 +66,13 @@ export class CartPageComponent implements OnInit {
     this.updatingItem[itemId] = true;
 
     this.cartService.removeItem(itemId).subscribe({
-      next: () => this.loadCart(),
-      error: () => this.updatingItem[itemId] = false
+      next: () => {
+        this.updatingItem[itemId] = false;
+        this.loadCart();
+      },
+      error: () => {
+        this.updatingItem[itemId] = false;
+      }
     });
   }
 
