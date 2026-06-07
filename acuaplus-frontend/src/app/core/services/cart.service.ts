@@ -4,7 +4,14 @@ import {ApiService} from "./api.service";
 
 export interface CartItem {
   id: number; 
+  cart_id: number;
   product_id: number;
+  unit_price_snapshot: string;
+  added_at: string;
+  name: string;
+  price: string;
+  stock: number;
+  image_url: string | null;
   product_name: string;
   product_price: number;
   product_image: string | null;
@@ -15,6 +22,8 @@ export interface CartItem {
 export interface Cart {
   id: number; 
   user_id: number;
+  created_at: string;
+  updated_at: string;
   total_amount: number;
   items: CartItem[];
 }
