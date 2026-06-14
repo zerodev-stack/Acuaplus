@@ -103,7 +103,7 @@
 
   <!-- Saludo -->
   <div class="mb-4">
-    <h2 class="fw-bold mb-1">{{ greeting }}, {{ firstName }} 👋</h2>
+    <h2 class="fw-bold mb-1">{{ greeting }}, {{ firstName }}</h2>
     <p class="text-muted mb-0">
       Aquí tienes un resumen de tu actividad en Acuaplus.
     </p>
@@ -172,7 +172,7 @@
       </div>
     </div>
 
-    <!-- Productos (solo vendedor) -->
+    <!-- Sección de Productos (solo vendedor) -->
     <div class="col-6 col-md-3" *ngIf="user?.role === 'seller'">
       <div class="card border-0 shadow-sm h-100">
         <div class="card-body">
@@ -245,7 +245,7 @@
               </a>
             </ng-container>
 
-            
+            <!-- Sección de Productos (solo vendedor) -->
             <ng-container *ngIf="user?.role === 'seller'">
               <a href="#" class="list-group-item list-group-item-action d-flex gap-3 py-3">
                 <span class="fs-4">➕</span>

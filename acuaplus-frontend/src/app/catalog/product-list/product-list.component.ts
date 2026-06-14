@@ -82,6 +82,9 @@ export class ProductListComponent implements OnInit {
     this.currentPage = page;
     this.loadProducts();
   }
+  goToCart(): void {
+    window.location.href = '/cart';
+  }
   logout(): void {
     this.authService.logout();
   }

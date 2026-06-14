@@ -24,7 +24,7 @@ export class CheckoutPageComponent implements OnInit {
   // Selecciones del usuario
   selectedAddressId: number | null = null;
   selectedCardId: number | null = null;
-  paymentMethod: 'card' | 'transfer' | 'cash_on_delivery' = 'card';
+  paymentMethod: 'card' | 'transfer' | 'cashondelivery' = 'card';
 
   // Resultado final
   createdOrder: Order | null = null;
@@ -53,6 +53,7 @@ export class CheckoutPageComponent implements OnInit {
     private router: Router
   ) {
     this.newAddressForm = this.fb.group({
+      recipient_name: ['', [Validators.required, Validators.minLength(2)]],
       address_line: ['', [Validators.required, Validators.minLength(5)]],
       city:         ['', Validators.required],
       department:   ['', Validators.required],
@@ -142,7 +143,7 @@ export class CheckoutPageComponent implements OnInit {
     this.paymentMethod = 'card';
   }
 
-  selectPaymentMethod(method: 'card' | 'transfer' | 'cash_on_delivery'): void {
+  selectPaymentMethod(method: 'card' | 'transfer' | 'cashondelivery'): void {
     this.paymentMethod = method;
     if (method !== 'card') this.selectedCardId = null;
   }

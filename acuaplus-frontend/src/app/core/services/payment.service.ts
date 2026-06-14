@@ -24,7 +24,7 @@ export interface PaymentResult {
 export class PaymentService {
   constructor(private apiService: ApiService) {}
   getCards() {
-    return this.apiService.get<{ data: SavedCard[] }>('payment/cards');
+    return this.apiService.get<{ data: SavedCard[] }>('payments/cards');
   }
   savedCard(data: {
     pan: string;
@@ -34,11 +34,11 @@ export class PaymentService {
     exp_year: number;
     is_default: boolean;
   }) {
-    return this.apiService.post<{ data: SavedCard }>('payment/cards', data);
+    return this.apiService.post<{ data: SavedCard }>('payments/cards', data);
   }
 
   processPayment(order_id: number, card_id: number) {
-    return this.apiService.post<{ data: PaymentResult }>('payment/process', {
+    return this.apiService.post<{ data: PaymentResult }>('payments/process', {
       order_id,
       card_id,
     });

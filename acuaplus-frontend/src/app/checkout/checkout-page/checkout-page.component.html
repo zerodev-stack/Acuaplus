@@ -83,6 +83,13 @@
           <h6 class="fw-semibold mb-3">Nueva dirección</h6>
           <form [formGroup]="newAddressForm">
             <div class="mb-3">
+              <div class="mb-3">
+  <label class="form-label fw-semibold small">Nombre del destinatario</label>
+  <input type="text" class="form-control" formControlName="recipient_name"
+    placeholder="Ej: Juan Pérez"
+    [class.is-invalid]="newAddressForm.get('recipient_name')?.invalid && newAddressForm.get('recipient_name')?.touched">
+  <div class="invalid-feedback">Mínimo 2 caracteres</div>
+</div>
               <label class="form-label fw-semibold small">Dirección</label>
               <input type="text" class="form-control" formControlName="address_line"
                 placeholder="Ej: Cra 10 #25-30"
@@ -171,9 +178,9 @@
         <i class="bi bi-bank me-1"></i> Transferencia
       </button>
       <button class="btn btn-sm flex-fill"
-        [class.btn-primary]="paymentMethod === 'cash_on_delivery'"
-        [class.btn-outline-secondary]="paymentMethod !== 'cash_on_delivery'"
-        (click)="selectPaymentMethod('cash_on_delivery')">
+        [class.btn-primary]="paymentMethod === 'cashondelivery'"
+        [class.btn-outline-secondary]="paymentMethod !== 'cashondelivery'"
+        (click)="selectPaymentMethod('cashondelivery')">
         <i class="bi bi-cash me-1"></i> Contra entrega
       </button>
     </div>
@@ -286,7 +293,7 @@
     </div>
 
     <!-- Contra entrega -->
-    <div *ngIf="paymentMethod === 'cash_on_delivery'" class="alert alert-warning">
+    <div *ngIf="paymentMethod === 'cashondelivery'" class="alert alert-warning">
       <i class="bi bi-truck me-2"></i>
       Pagarás en efectivo al recibir tu pedido.
     </div>

@@ -4,9 +4,10 @@ import {ApiService} from "./api.service";
 export interface Address {
   id: number;
   user_id: number;
+  recipient_name: string;
   address_line: string;
   city: string;
-  department: string;
+  department: string;   // ← viene del alias AS department
   zip_code: string | null;
   is_default: number;
 }
@@ -22,6 +23,7 @@ getAddresses() {
 }
 
 createAddress(data: {
+  recipient_name: string;
   address_line: string;
   city: string;
   department: string;
