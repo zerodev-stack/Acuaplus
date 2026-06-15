@@ -36,7 +36,7 @@
     <div class="col-12 col-md-6">
       <div class="card border-0 shadow-sm overflow-hidden">
         <img
-          [src]="product.image_url || fallbackImage"
+          [src]="product.primaryimage || fallbackImage"
           [alt]="product.name"
           class="w-100"
           style="height: 360px; object-fit: cover;"
@@ -49,7 +49,7 @@
       <div class="d-flex flex-column gap-3">
         <div>
           <span class="badge bg-primary bg-opacity-10 text-primary mb-2">
-            {{ product.category }}
+            {{ product.categoryname }}
           </span>
           <h3 class="fw-bold mb-2">{{ product.name }}</h3>
           <p class="text-muted mb-0">{{ product.description }}</p>
@@ -109,7 +109,7 @@
                 <strong>Stock:</strong> {{ product.stock }}
               </div>
               <div class="col-6">
-                <strong>Categoría:</strong> {{ product.category }}
+                <strong>Categoría:</strong> {{ product.categoryname }}
               </div>
               <div class="col-6">
                 <strong>Precio:</strong> {{ formatPrice(product.price) }}

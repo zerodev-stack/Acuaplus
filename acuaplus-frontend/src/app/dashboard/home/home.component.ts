@@ -95,7 +95,11 @@ export class HomeComponent implements OnInit {
  get firstName(): string {
   return this.user?.name?.split(' ')[0] ?? '';
  }
- goToCatalog() {
+ goToCatalog(): void {
+  if (this.user?.role === 'seller') {
+    this.router.navigate(['/seller/products/new']);
+  } else {
   this.router.navigate(['/catalog']);
+}
  }
 }

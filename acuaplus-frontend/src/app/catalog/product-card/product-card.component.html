@@ -1,7 +1,7 @@
 <div class="card h-100 shadow-sm border-0">
   <div style="height: 200px; overflow: hidden; background: #f8f9fa">
     <img
-      [src]="product.image_url || fallbackImage"
+      [src]="product.primaryimage || fallbackImage"
       [alt]="product.name"
       (error)="onImageError($event)"
       class="card-img-top"
@@ -13,7 +13,7 @@
     <span
       class="badge bg-primary bg-opacity-10 text-primary mb-2"
       style="width: fit-content"
-      >{{ product.category }}
+      >{{ product.categoryname }}
     </span>
     <h6 class="card-title fw-bold mb-1 text-truncate" [title]="product.name">
       {{ product.name }}

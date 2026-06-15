@@ -247,7 +247,7 @@
 
             <!-- Sección de Productos (solo vendedor) -->
             <ng-container *ngIf="user?.role === 'seller'">
-              <a href="#" class="list-group-item list-group-item-action d-flex gap-3 py-3">
+              <a routerLink="/seller/products/new" class="list-group-item list-group-item-action d-flex gap-3 py-3">
                 <span class="fs-4">➕</span>
                 <div>
                   <div class="fw-semibold">Publicar un producto</div>
@@ -255,7 +255,7 @@
                 </div>
                 <i class="bi bi-chevron-right ms-auto text-muted"></i>
               </a>
-              <a href="#" class="list-group-item list-group-item-action d-flex gap-3 py-3">
+              <a routerLink="/seller" class="list-group-item list-group-item-action d-flex gap-3 py-3">
                 <span class="fs-4">📊</span>
                 <div>
                   <div class="fw-semibold">Ver mis ventas</div>

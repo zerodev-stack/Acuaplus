@@ -1,0 +1,210 @@
+<div class="container py-4" style="max-width: 780px;">
+  <!-- Header -->
+  <div class="mb-4">
+    <a routerLink="/seller/products" class="text-muted small">
+      <i class="bi bi-arrow-left me-1"></i>Volver a mis productos
+    </a>
+    <h4 class="fw-bold mb-0 mt-1">
+      {{ isEditing ? 'Editar producto' : 'Agregar nuevo producto' }}
+    </h4>
+  </div>
+
+  <!-- Skeleton mientras carga en modo edición -->
+  <div *ngIf="loadingData" class="card border-0 shadow-sm p-4">
+    <div class="placeholder-glow">
+      <span class="placeholder col-6 mb-3 d-block" style="height:1.5rem"></span>
+      <span class="placeholder col-12 mb-2 d-block"></span>
+      <span class="placeholder col-12 mb-2 d-block"></span>
+      <span class="placeholder col-8 d-block"></span>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <form *ngIf="!loadingData" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+    <!-- Mensajes -->
+    <div *ngIf="errorMsg" class="alert alert-danger py-2 small">{{ errorMsg }}</div>
+    <div *ngIf="successMsg" class="alert alert-success py-2 small">
+      <i class="bi bi-check-circle me-1"></i>{{ successMsg }}
+    </div>
+
+    <!-- Sección: Información básica -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:.75rem;letter-spacing:.05em">
+          <i class="bi bi-info-circle me-1"></i>Información básica
+        </h6>
+        <div class="row g-3">
+          <!-- Nombre -->
+          <div class="col-12">
+            <label class="form-label fw-semibold">Nombre del producto <span class="text-danger">*</span></label>
+            <input type="text" formControlName="name" class="form-control"
+              [class.is-invalid]="name.invalid && name.touched"
+              placeholder="Ej. Pez Ángel Scalare">
+            <div class="invalid-feedback">
+              <span *ngIf="name.errors?.['required']">El nombre es obligatorio</span>
+              <span *ngIf="name.errors?.['minlength']">Mínimo 3 caracteres</span>
+            </div>
+          </div>
+
+          <!-- Categoría -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Categoría <span class="text-danger">*</span></label>
+            <select formControlName="categoryid" class="form-select"
+              [class.is-invalid]="categoryid.invalid && categoryid.touched">
+              <option value="">Seleccionar categoría...</option>
+              <ng-container *ngFor="let cat of categories">
+                <option [value]="cat.id">{{ cat.name }}</option>
+                <option *ngFor="let child of cat.children" [value]="child.id">
+                  &nbsp;&nbsp;↳ {{ child.name }}
+                </option>
+              </ng-container>
+            </select>
+            <div class="invalid-feedback">La categoría es obligatoria</div>
+          </div>
+
+          <!-- Estado -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Estado</label>
+            <select formControlName="status" class="form-select">
+              <option value="draft">Borrador (no visible)</option>
+              <option value="active">Activo (visible en catálogo)</option>
+            </select>
+          </div>
+
+          <!-- Descripción -->
+          <div class="col-12">
+            <label class="form-label fw-semibold">Descripción</label>
+            <textarea formControlName="description" class="form-control" rows="3"
+              placeholder="Describe las características del producto..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección: Precio e inventario -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:.75rem;letter-spacing:.05em">
+          <i class="bi bi-currency-dollar me-1"></i>Precio e inventario
+        </h6>
+        <div class="row g-3">
+          <!-- Precio -->
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Precio (COP) <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="number" formControlName="price" class="form-control"
+                [class.is-invalid]="price.invalid && price.touched"
+                placeholder="0" min="1">
+            </div>
+            <div class="invalid-feedback d-block" *ngIf="price.invalid && price.touched">
+              Ingresa un precio válido
+            </div>
+          </div>
+
+          <!-- Stock -->
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Stock disponible <span class="text-danger">*</span></label>
+            <input type="number" formControlName="stock" class="form-control"
+              [class.is-invalid]="stock.invalid && stock.touched"
+              placeholder="0" min="0">
+            <div class="invalid-feedback">El stock es obligatorio</div>
+          </div>
+
+          <!-- Cantidad mínima -->
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Cantidad mínima de orden</label>
+            <input type="number" formControlName="minorderqty" class="form-control"
+              placeholder="1" min="1">
+          </div>
+
+          <!-- SKU -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">SKU <span class="text-muted fw-normal">(opcional)</span></label>
+            <input type="text" formControlName="sku" class="form-control" placeholder="Ej. PEZ-ANG-001">
+          </div>
+
+          <!-- Unidad -->
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Unidad <span class="text-muted fw-normal">(opcional)</span></label>
+            <input type="text" formControlName="unit" class="form-control" placeholder="Ej. unidad, kg, lt">
+          </div>
+
+          <!-- Peso -->
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Peso (kg) <span class="text-muted fw-normal">(opcional)</span></label>
+            <input type="number" formControlName="weightkg" class="form-control" placeholder="0.5" min="0" step="0.1">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección: Imagen -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:.75rem;letter-spacing:.05em">
+          <i class="bi bi-image me-1"></i>Imagen del producto
+        </h6>
+        <label class="form-label fw-semibold">URL de imagen <span class="text-muted fw-normal">(opcional)</span></label>
+        <input type="url" formControlName="imageurl" class="form-control"
+          placeholder="https://ejemplo.com/imagen.jpg">
+        <div class="form-text">Pega la URL de una imagen pública del producto.</div>
+      </div>
+    </div>
+
+    <!-- Sección: Especificaciones técnicas -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold text-muted text-uppercase mb-0" style="font-size:.75rem;letter-spacing:.05em">
+            <i class="bi bi-list-check me-1"></i>Especificaciones técnicas
+          </h6>
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="addSpec()">
+            <i class="bi bi-plus me-1"></i>Agregar spec
+          </button>
+        </div>
+
+        <div *ngIf="specsArray.length === 0" class="text-muted small py-2">
+          No hay especificaciones. Agrega características como temperatura, pH, tamaño, etc.
+        </div>
+
+        <div formArrayName="specs">
+          <div *ngFor="let spec of specsArray.controls; let i = index" [formGroupName]="i"
+            class="row g-2 align-items-center mb-2">
+            <div class="col-md-4">
+              <input type="text" formControlName="speckey" class="form-control form-control-sm"
+                placeholder="Ej. Temperatura" [class.is-invalid]="spec.get('speckey')?.invalid && spec.get('speckey')?.touched">
+            </div>
+            <div class="col-md-5">
+              <input type="text" formControlName="specvalue" class="form-control form-control-sm"
+                placeholder="Ej. 24-28°C" [class.is-invalid]="spec.get('specvalue')?.invalid && spec.get('specvalue')?.touched">
+            </div>
+            <div class="col-md-2">
+              <select formControlName="spectype" class="form-select form-select-sm">
+                <option value="text">Texto</option>
+                <option value="number">Número</option>
+                <option value="range">Rango</option>
+              </select>
+            </div>
+            <div class="col-md-1">
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeSpec(i)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="d-flex justify-content-end gap-2">
+      <a routerLink="/seller/products" class="btn btn-outline-secondary">Cancelar</a>
+      <button type="submit" class="btn btn-primary px-4" [disabled]="loading">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+        {{ loading ? 'Guardando...' : (isEditing ? 'Actualizar producto' : 'Publicar producto') }}
+      </button>
+    </div>
+
+  </form>
+</div>

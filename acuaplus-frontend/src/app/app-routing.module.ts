@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
+import { SellerGuard } from './core/guards/seller.guard';
 
 const routes: Routes = [
   {
@@ -20,6 +21,11 @@ const routes: Routes = [
   path: 'orders',
   loadChildren: () => import('./orders/orders.module').then(m => m.OrdersModule),
   canActivate: [AuthGuard]
+},
+{
+  path: 'seller',
+  loadChildren: () => import('./seller/seller.module').then(m => m.SellerModule),
+  canActivate: [AuthGuard, SellerGuard],
 },
   {
     path: 'catalog', loadChildren: () => import ('./catalog/catalog.module').then(m => m.CatalogModule), canActivate: [AuthGuard] 
