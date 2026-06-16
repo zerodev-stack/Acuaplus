@@ -48,10 +48,11 @@
       >
      <button
   class="btn btn-primary btn-sm"
-  [disabled]="product.stock === 0"
+  [disabled]="product.stock === 0 || addingToCart"
   (click)="onAddToCart()">
-  <i class="bi bi-cart-plus me-1"></i>
-  Agregar al carrito
+  <span *ngIf="addingToCart" class="spinner-border spinner-border-sm me-1"></span>
+  <i *ngIf="!addingToCart" class="bi bi-cart-plus me-1"></i>
+  {{ addingToCart ? 'Agregando...' : 'Agregar al carrito' }}
 </button>
 
     </div>

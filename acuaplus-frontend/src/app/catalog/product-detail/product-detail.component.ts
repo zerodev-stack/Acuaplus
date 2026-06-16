@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService, Product } from '../../core/services/product.service';
+import { AuthService } from 'src/app/core/services/auth.service';
 import { CartService } from '../../core/services/cart.service';
 
 @Component({
@@ -21,7 +22,8 @@ export class ProductDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private productService: ProductService,
-    private cartService: CartService
+    private cartService: CartService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -58,6 +60,12 @@ export class ProductDetailComponent implements OnInit {
   }
 
   addToCart(): void {
+    if (!this.authService.isLoggedIn()) {
+    this.router.navigate(['/auth/login'], {
+      queryParams: { redirect: `/catalog/${this.product?.id}` }
+    });
+    return;
+  }
     if (!this.product || this.product.stock === 0 || this.quantity < 1) return;
 
     const qty = Math.min(this.quantity, this.product.stock);

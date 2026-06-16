@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import {Observable} from "rxjs";
-import {ApiService} from "./api.service";
+import { Observable, BehaviorSubject, tap } from 'rxjs';
+import { ApiService } from './api.service';
 
 export interface CartItem {
-  id: number; 
+  id: number;
   cart_id: number;
   product_id: number;
   unit_price_snapshot: string;
@@ -20,7 +20,7 @@ export interface CartItem {
 }
 
 export interface Cart {
-  id: number; 
+  id: number;
   user_id: number;
   created_at: string;
   updated_at: string;
@@ -28,24 +28,50 @@ export interface Cart {
   items: CartItem[];
 }
 
-
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class CartService {
+  private itemCountSubject = new BehaviorSubject<number>(0);
+  itemCount$ = this.itemCountSubject.asObservable();
 
-  constructor(private apiService: ApiService) { }
+  constructor(private apiService: ApiService) {}
 
-  getCart(): Observable<{ data: Cart}> {
-    return this.apiService.get<{data: Cart}>('/cart');
+  get itemCount(): number {
+    return this.itemCountSubject.value;
   }
-  addItem(productId: number, quantity: number): Observable<any>{
-    return this.apiService.post('/cart/items', {product_id: productId, quantity});
+
+  getCart(): Observable<{ data: Cart }> {
+    return this.apiService.get<{ data: Cart }>('/cart').pipe(
+      tap((res) => {
+        const count = res.data?.items?.reduce((sum, i) => sum + i.quantity, 0) ?? 0;
+        this.itemCountSubject.next(count);
+      })
+    );
   }
-  updateItem(itemId: number, quantity: number): Observable<any>{
-    return this.apiService.patch(`/cart/items/${itemId}`, {quantity});
+
+  addItem(productId: number, quantity: number): Observable<any> {
+    return this.apiService.post('/cart/items', { productid: productId, quantity }).pipe(
+      tap((res: any) => {
+        const count = res.data?.items?.reduce((sum: number, i: any) => sum + i.quantity, 0) ?? 0;
+        this.itemCountSubject.next(count);
+      })
+    );
   }
-  removeItem(itemId: number): Observable<any>{
-    return this.apiService.delete(`/cart/items/${itemId}`);
+
+  updateItem(itemId: number, quantity: number): Observable<any> {
+    return this.apiService.patch(`/cart/items/${itemId}`, { quantity }).pipe(
+      tap((res: any) => {
+        const count = res.data?.items?.reduce((sum: number, i: any) => sum + i.quantity, 0) ?? 0;
+        this.itemCountSubject.next(count);
+      })
+    );
+  }
+
+  removeItem(itemId: number): Observable<any> {
+    return this.apiService.delete(`/cart/items/${itemId}`).pipe(
+      tap((res: any) => {
+        const count = res.data?.items?.reduce((sum: number, i: any) => sum + i.quantity, 0) ?? 0;
+        this.itemCountSubject.next(count);
+      })
+    );
   }
 }

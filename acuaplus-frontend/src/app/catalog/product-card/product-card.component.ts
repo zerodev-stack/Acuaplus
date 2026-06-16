@@ -8,6 +8,7 @@ import { Product } from '../../core/services/product.service';
 })
 export class ProductCardComponent {
   @Input() product!: Product;
+  @Input() addingToCart = false;
   @Output() addToCart = new EventEmitter<Product>();
 
   readonly fallbackImage = 'https://placehold.co/400x300?text=Sin+imagen';
@@ -18,9 +19,7 @@ export class ProductCardComponent {
 
   formatPrice(price: number): string {
     return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0
+      style: 'currency', currency: 'COP', maximumFractionDigits: 0
     }).format(price);
   }
 

@@ -6,9 +6,7 @@ import { SellerGuard } from './core/guards/seller.guard';
 
 const routes: Routes = [
   {
-    path: '',
-    redirectTo: '/dashboard',
-    pathMatch: 'full'
+    path: '', loadChildren: () => import('./catalog/catalog.module').then(m => m.CatalogModule)
   },
   {
     path: 'auth',
@@ -17,6 +15,7 @@ const routes: Routes = [
   {
     path: 'dashboard',loadChildren: () => import ('./dashboard/dashboard.module').then(m => m.DashboardModule),canActivate: [AuthGuard]
   },
+   { path: 'catalog', loadChildren: () => import('./catalog/catalog.module').then(m => m.CatalogModule) },
   {
   path: 'orders',
   loadChildren: () => import('./orders/orders.module').then(m => m.OrdersModule),
