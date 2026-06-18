@@ -1,7 +1,7 @@
 <div class="card h-100 shadow-sm border-0">
   <div style="height: 200px; overflow: hidden; background: #f8f9fa">
     <img
-      [src]="product.primaryimage || fallbackImage"
+      [src]="product.primaryimage?.imageurl || fallbackImage"
       [alt]="product.name"
       (error)="onImageError($event)"
       class="card-img-top"

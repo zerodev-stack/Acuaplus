@@ -45,8 +45,10 @@ export class LoginComponent {
        const user = this.authService.currentUser;
        if (user?.role === 'admin') {
         this.router.navigate(['/admin']);
-       } else {
+       } if(user?.role === 'seller' ) {
         this.router.navigate(['/dashboard']);
+       } else {
+        this.router.navigate(['/catalog'])
        }
       },
       error: (err) => {

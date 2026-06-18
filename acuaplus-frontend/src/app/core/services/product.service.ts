@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
-import { SellerRoutingModule } from 'src/app/seller/seller-routing.module';
 
 export interface Product {
   id: number;
@@ -23,6 +22,7 @@ export interface Product {
   specs?: ProductSpec[];
   primaryimage?: ProductImage | null;
 }
+
 export interface ProductImage {
   id: number;
   imageurl: string;
@@ -36,6 +36,7 @@ export interface ProductSpec {
   specvalue: string;
   spectype: 'text' | 'number' | 'range';
 }
+
 export interface ProductsResponse {
   data: Product[];
   total: number;
@@ -43,6 +44,7 @@ export interface ProductsResponse {
   limit: number;
   totalPages: number;
 }
+
 export interface Category {
   id: number;
   name: string;
@@ -59,17 +61,14 @@ export interface CreateProductPayload {
   minorderqty: number;
   unit?: string;
   weightkg?: number;
-  status?: 'draft'|'active';
+  status?: 'draft' | 'active';
   specs?: ProductSpec[];
-  images?: { imageurl: string; alttext?: string; source: 'url'; isprimary: boolean} [];
-}
-export interface ProductFilters {
-  search?: string;
-  category?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  page?: number;
-  limit?: number;
+  images?: {
+    imageurl: string;
+    alttext?: string;
+    source: 'url';
+    isprimary: boolean;
+  }[];
 }
 
 export interface ProductFilters {
@@ -83,13 +82,28 @@ export interface ProductFilters {
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-
   constructor(private api: ApiService) {}
 
   getProducts(filters: ProductFilters = {}) {
     const params = new URLSearchParams();
-    if (filters.category_id) params.set('category_id', String(filters.category_id));
-    params.set('page',  String(filters.page  ?? 1));
+
+    if (filters.search) {
+      params.set('search', filters.search);
+    }
+
+    if (filters.category_id) {
+      params.set('category_id', String(filters.category_id));
+    }
+
+    if (filters.min_price !== undefined) {
+      params.set('min_price', String(filters.min_price));
+    }
+
+    if (filters.max_price !== undefined) {
+      params.set('max_price', String(filters.max_price));
+    }
+
+    params.set('page', String(filters.page ?? 1));
     params.set('limit', String(filters.limit ?? 12));
 
     const query = params.toString();
@@ -101,13 +115,15 @@ export class ProductService {
   }
 
   getMyProducts(params: Record<string, string> = {}) {
-    const query = new URLSearchParams({...params, sellerid: 'me'}).toString();
+    const query = new URLSearchParams({ ...params, sellerid: 'me' }).toString();
     return this.api.get<any>(`products?${query}`);
   }
 
   getSellerProducts(page = 1, limit = 10, status?: string) {
     let path = `products?limit=${limit}&page=${page}`;
-    if (status) path += `&status=${status}`;
+    if (status) {
+      path += `&status=${status}`;
+    }
     return this.api.get<any>(path);
   }
 
@@ -119,16 +135,16 @@ export class ProductService {
     return this.api.post<any>('products', payload);
   }
 
-  update(id: number, payload: Partial<CreateProductPayload>){
+  update(id: number, payload: Partial<CreateProductPayload>) {
     return this.api.patch<any>(`products/${id}`, payload);
   }
 
   delete(id: number) {
-    return this.api.patch<any>(`products/${id}`, {status: 'deleted'});
+    return this.api.patch<any>(`products/${id}`, { status: 'deleted' });
   }
 
-  addImageByUrl(productId: number, imageurl: string){
-    return this.api.post<any>(`products/${productId}/images`, {imageurl});
+  addImageByUrl(productId: number, imageurl: string) {
+    return this.api.post<any>(`products/${productId}/images`, { imageurl });
   }
 
   getCategories() {

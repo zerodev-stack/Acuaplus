@@ -49,7 +49,7 @@ export class CartService {
   }
 
   addItem(productId: number, quantity: number): Observable<any> {
-    return this.apiService.post('/cart/items', { productid: productId, quantity }).pipe(
+    return this.apiService.post('/cart/items', { product_id: productId, quantity }).pipe(
       tap((res: any) => {
         const count = res.data?.items?.reduce((sum: number, i: any) => sum + i.quantity, 0) ?? 0;
         this.itemCountSubject.next(count);

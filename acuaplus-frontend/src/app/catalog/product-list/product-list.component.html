@@ -1,4 +1,4 @@
-<!-- Navbar adaptable: visitante / comprador / vendedor -->
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
   <div class="container">
     <a class="navbar-brand fw-bold d-flex align-items-center gap-2" routerLink="/">
@@ -10,26 +10,22 @@
     </button>
 
     <div class="collapse navbar-collapse" id="navCatalog">
-      <!-- Links izquierda -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+          <a class="nav-link active" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
             <i class="bi bi-grid me-1"></i> Catálogo
           </a>
         </li>
-        <!-- Solo para compradores logueados -->
         <li class="nav-item" *ngIf="isLoggedIn && user?.role === 'buyer'">
           <a class="nav-link" routerLink="/orders">
             <i class="bi bi-receipt me-1"></i> Mis órdenes
           </a>
         </li>
-        <!-- Para vendedores -->
         <li class="nav-item" *ngIf="isLoggedIn && user?.role === 'seller'">
           <a class="nav-link" routerLink="/seller">
             <i class="bi bi-box-seam me-1"></i> Mi tienda
           </a>
         </li>
-        <!-- Para admin -->
         <li class="nav-item" *ngIf="isLoggedIn && user?.role === 'admin'">
           <a class="nav-link" routerLink="/admin">
             <i class="bi bi-shield-check me-1"></i> Admin
@@ -37,10 +33,7 @@
         </li>
       </ul>
 
-      <!-- Derecha -->
       <div class="d-flex align-items-center gap-2">
-
-        <!-- VISITANTE (no logueado) -->
         <ng-container *ngIf="!isLoggedIn">
           <a routerLink="/auth/login" class="btn btn-outline-light btn-sm">
             <i class="bi bi-person me-1"></i> Iniciar sesión
@@ -50,9 +43,7 @@
           </a>
         </ng-container>
 
-        <!-- LOGUEADO -->
         <ng-container *ngIf="isLoggedIn">
-          <!-- Carrito (solo buyers) -->
           <a *ngIf="user?.role === 'buyer'" routerLink="/cart" class="btn btn-outline-light btn-sm position-relative">
             <i class="bi bi-cart fs-5"></i>
             <span *ngIf="cartItemCount > 0"
@@ -62,7 +53,6 @@
             </span>
           </a>
 
-          <!-- Menú de usuario -->
           <div class="dropdown">
             <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center gap-2"
               type="button" data-bs-toggle="dropdown">
@@ -85,19 +75,48 @@
             </ul>
           </div>
         </ng-container>
-
       </div>
     </div>
   </div>
 </nav>
 
-<!-- Mensajes flotantes -->
+<!-- Buscador centrado -->
+<section class="search-strip">
+  <div class="container">
+    <div class="search-strip__inner">
+      <div class="search-box">
+        <span class="search-box__icon">
+          <i class="bi bi-search"></i>
+        </span>
+
+        <input
+          type="text"
+          class="search-box__input"
+          placeholder="Buscar productos..."
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange($event)"
+        />
+
+        <button
+          *ngIf="searchQuery"
+          type="button"
+          class="search-box__clear"
+          (click)="clearSearch()"
+          aria-label="Limpiar búsqueda"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Toasts -->
 <div *ngIf="cartMessage" class="position-fixed bottom-0 end-0 p-3" style="z-index:1080">
   <div class="toast show align-items-center text-white bg-success border-0">
     <div class="d-flex">
       <div class="toast-body">{{ cartMessage }}</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto"
-        (click)="cartMessage = ''"></button>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="cartMessage = ''"></button>
     </div>
   </div>
 </div>
@@ -105,27 +124,98 @@
   <div class="toast show align-items-center text-white bg-danger border-0">
     <div class="d-flex">
       <div class="toast-body">{{ cartError }}</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto"
-        (click)="cartError = ''"></button>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="cartError = ''"></button>
     </div>
+  </div>
+</div>
+
+<!-- Banner promocional -->
+<div class="promo-banner-wrapper">
+  <div id="promoBanner" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000">
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#promoBanner" data-bs-slide-to="0" class="active"></button>
+      <button type="button" data-bs-target="#promoBanner" data-bs-slide-to="1"></button>
+      <button type="button" data-bs-target="#promoBanner" data-bs-slide-to="2"></button>
+    </div>
+
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <div class="promo-slide promo-slide--img">
+          <img
+            src="../../../assets/mega-sale-vector-banner-abstract-260nw-2695409101.webp"
+            alt="Mega Sale"
+            class="promo-slide__img"
+          />
+          <div class="promo-slide__overlay"></div>
+          <div class="promo-slide__caption">
+            <span class="promo-badge">Oferta especial</span>
+            <h2 class="promo-title">Toda la tienda<br /><strong>50% de descuento</strong></h2>
+            <a routerLink="/" class="btn btn-light fw-semibold px-4">
+              Ver ofertas <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="carousel-item">
+        <div class="promo-slide promo-slide--gradient-blue">
+          <div class="promo-slide__caption promo-slide__caption--center">
+            <span class="promo-badge promo-badge--light">Nuevos productos</span>
+            <h2 class="promo-title text-white">Equipos de acuicultura<br /><strong>recién llegados</strong></h2>
+            <a routerLink="/" class="btn btn-outline-light fw-semibold px-4">
+              Explorar <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="carousel-item">
+        <div class="promo-slide promo-slide--gradient-teal">
+          <div class="promo-slide__caption promo-slide__caption--center">
+            <span class="promo-badge promo-badge--dark">Envío gratis</span>
+            <h2 class="promo-title text-white">En compras mayores<br /><strong>a $500.000 COP</strong></h2>
+            <a routerLink="/" class="btn btn-light fw-semibold px-4">
+              Comprar ahora <i class="bi bi-cart ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#promoBanner" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#promoBanner" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
   </div>
 </div>
 
 <!-- Contenido -->
 <div class="container py-4">
-  <div class="mb-4">
-    <h4 class="fw-bold mb-1">Encuentra tu producto ideal</h4>
-    <p class="text-muted small mb-0">{{ total }} producto(s) disponibles</p>
+  <div class="row g-2 mb-4 align-items-center">
+    <div class="col-12 col-md-5">
+      <app-category-filter (categorySelected)="onCategorySelected($event)"></app-category-filter>
+    </div>
   </div>
 
-  <app-category-filter (categorySelected)="onCategorySelected($event)"></app-category-filter>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <p class="text-muted small mb-0">
+      <span *ngIf="!searchQuery">{{ total }} producto(s) disponibles</span>
+      <span *ngIf="searchQuery">
+        {{ total }} resultado(s) para <strong>"{{ searchQuery }}"</strong>
+        <button class="btn btn-link btn-sm p-0 ms-1 text-muted" (click)="clearSearch()">
+          Limpiar búsqueda
+        </button>
+      </span>
+    </p>
+  </div>
 
-  <!-- Loading skeleton -->
   <div *ngIf="loading" class="row g-3">
     <div *ngFor="let i of [1,2,3,4,5,6,7,8]" class="col-6 col-md-4 col-lg-3">
       <div class="card border-0 shadow-sm">
         <div class="placeholder-glow">
-          <div class="placeholder w-100" style="height:180px;"></div>
+          <div class="placeholder w-100" style="height:180px"></div>
         </div>
         <div class="card-body">
           <span class="placeholder col-8 d-block mb-2"></span>
@@ -135,18 +225,21 @@
     </div>
   </div>
 
-  <!-- Error -->
   <div *ngIf="error && !loading" class="alert alert-warning d-flex align-items-center gap-2">
     <i class="bi bi-exclamation-triangle"></i>
     No se pudieron cargar los productos.
     <button class="btn btn-sm btn-warning ms-auto" (click)="loadProducts()">Reintentar</button>
   </div>
 
-  <!-- Productos -->
   <div *ngIf="!loading && !error">
     <div *ngIf="products.length === 0" class="text-center py-5">
-      <i class="bi bi-box-seam fs-1 text-muted d-block mb-2"></i>
-      <p class="text-muted">No hay productos en esta categoría.</p>
+      <i class="bi bi-search fs-1 text-muted d-block mb-2"></i>
+      <p class="text-muted">
+        No se encontraron productos{{ searchQuery ? ' para "' + searchQuery + '"' : '' }}.
+      </p>
+      <button *ngIf="searchQuery" class="btn btn-outline-primary btn-sm" (click)="clearSearch()">
+        Ver todos los productos
+      </button>
     </div>
 
     <div *ngIf="products.length > 0" class="row g-3">
@@ -159,7 +252,6 @@
       </div>
     </div>
 
-    <!-- Paginación -->
     <nav *ngIf="totalPages > 1" class="mt-4 d-flex justify-content-center">
       <ul class="pagination">
         <li class="page-item" [class.disabled]="currentPage === 1">

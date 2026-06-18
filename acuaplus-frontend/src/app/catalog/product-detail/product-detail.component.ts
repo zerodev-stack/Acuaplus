@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService, Product } from '../../core/services/product.service';
-import { AuthService } from 'src/app/core/services/auth.service';
 import { CartService } from '../../core/services/cart.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -16,7 +16,8 @@ export class ProductDetailComponent implements OnInit {
   quantity = 1;
   addingToCart = false;
   cartMessage = '';
-  readonly fallbackImage = 'https://placehold.co/600x500?text=No+image';
+  cartError = '';
+  readonly fallbackImage = 'https://placehold.co/600x500?text=Sin+imagen';
 
   constructor(
     private route: ActivatedRoute,
@@ -28,24 +29,18 @@ export class ProductDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-
-    if (!id) {
-      this.router.navigate(['/catalog']);
-      return;
-    }
-
+    if (!id) { this.router.navigate(['/']); return; }
     this.loadProduct(id);
   }
 
   loadProduct(id: number): void {
     this.loading = true;
     this.error = false;
-    this.cartMessage = '';
 
     this.productService.getProductById(id).subscribe({
       next: (res) => {
         this.product = res.data;
-        this.quantity = 1;
+        this.quantity = this.product?.minorderqty ?? 1;
         this.loading = false;
       },
       error: () => {
@@ -55,31 +50,31 @@ export class ProductDetailComponent implements OnInit {
     });
   }
 
-  goBack(): void {
-    this.router.navigate(['/catalog']);
-  }
+  goBack(): void { this.router.navigate(['/']); }
 
   addToCart(): void {
     if (!this.authService.isLoggedIn()) {
-    this.router.navigate(['/auth/login'], {
-      queryParams: { redirect: `/catalog/${this.product?.id}` }
-    });
-    return;
-  }
-    if (!this.product || this.product.stock === 0 || this.quantity < 1) return;
+      this.router.navigate(['/auth/login'], {
+        queryParams: { redirect: `/catalog/${this.product?.id}` }
+      });
+      return;
+    }
+
+    if (!this.product || this.product.stock === 0) return;
 
     const qty = Math.min(this.quantity, this.product.stock);
     this.addingToCart = true;
     this.cartMessage = '';
+    this.cartError = '';
 
     this.cartService.addItem(this.product.id, qty).subscribe({
       next: () => {
         this.addingToCart = false;
-        this.cartMessage = `${this.product?.name} fue agregado al carrito.`;
+        this.cartMessage = `✓ ${this.product?.name} agregado al carrito.`;
       },
       error: () => {
         this.addingToCart = false;
-        this.cartMessage = 'No se pudo agregar el producto al carrito.';
+        this.cartError = 'No se pudo agregar el producto al carrito.';
       }
     });
   }
@@ -90,11 +85,11 @@ export class ProductDetailComponent implements OnInit {
 
   formatPrice(price: number): string {
     return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0
+      style: 'currency', currency: 'COP', maximumFractionDigits: 0
     }).format(price);
   }
+
+  get isLoggedIn(): boolean { return this.authService.isLoggedIn(); }
 
   get stockBadgeClass(): string {
     if (!this.product) return 'bg-secondary';
