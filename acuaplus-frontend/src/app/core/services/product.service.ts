@@ -136,6 +136,7 @@ export class ProductService {
 
   update(id: number, payload: Partial<CreateProductPayload>) {
     return this.api.patch<{ data: Product }>(`products/${id}`, payload);
+    
   }
 
   delete(id: number) {
