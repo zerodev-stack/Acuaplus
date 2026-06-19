@@ -7,17 +7,48 @@ import { AppError } from '../../utils/AppError';
  * Crea un nuevo producto.
  * Valida los datos de entrada con Zod y asigna el producto al usuario autenticado (vendedor).
  */
+// export const create = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     console.log('📦 Body recibido:', JSON.stringify(req.body, null, 2))
+//     const input = createProductSchema.parse(req.body);
+//     // req.user!.userId viene del middleware de autenticación (JWT)
+//     const product = await productsService.createProduct(req.user!.userId, input);
+//     res.status(201).json({ data: product });
+//   } catch (error) {
+//     if (error instanceof AppError) return next(error);
+//     if ((error as any)?.name === 'ZodError') {
+//       return next(new AppError(400, 'Datos inválidos', 'VALIDATION_ERROR', (error as any).errors));
+//     }
+//     next(error);
+//   }
+// };
+
 export const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const input = createProductSchema.parse(req.body);
-    // req.user!.userId viene del middleware de autenticación (JWT)
-    const product = await productsService.createProduct(req.user!.userId, input);
+    console.log('📦 Body recibido:', JSON.stringify(req.body, null, 2));
+
+    const parsed = createProductSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      console.log('❌ Zod issues:', JSON.stringify(parsed.error.issues, null, 2));
+      return next(new AppError(400, 'Datos inválidos', 'VALIDATION_ERROR', parsed.error.issues));
+    }
+
+    const product = await productsService.createProduct(req.user!.userId, parsed.data);
     res.status(201).json({ data: product });
   } catch (error) {
-    if (error instanceof AppError) return next(error);
-    if ((error as any)?.name === 'ZodError') {
-      return next(new AppError(400, 'Datos inválidos', 'VALIDATION_ERROR', (error as any).errors));
-    }
+    next(error);
+  }
+};
+
+export const getMine = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await productsService.listMyProducts(
+      req.user!.userId,
+      req.query as any
+    );
+    res.json(result);
+  } catch (error) {
     next(error);
   }
 };

@@ -70,7 +70,6 @@ export interface ProductRow {
   created_at: Date;
   updated_at: Date;
 }
-
 export interface ProductImageRow {
   id: number;
   product_id: number;

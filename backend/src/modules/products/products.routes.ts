@@ -7,6 +7,7 @@ import { getProductReviews } from '../reviews/reviews.controller';
 
 const router = Router();
 
+router.get('/mine', verifyToken, authorize('seller'), productsController.getMine);
 router.get('/', optionalAuth, productsController.getAll);
 router.get('/:id', optionalAuth, productsController.getById);
 router.post('/', verifyToken, authorize('seller'), productsController.create);

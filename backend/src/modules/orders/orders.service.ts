@@ -11,7 +11,9 @@ export const createOrder = async (buyerId: number, input: {
   card_id?: number;
   notes?: string;
 }) => {
-  return transaction(async (conn) => {
+  let createdOrderId: number = 0; // ← declarar fuera del transaction
+
+  await transaction(async (conn) => {
     const [carts] = await conn.execute<any[]>(
       'SELECT * FROM cart WHERE user_id = ?',
       [buyerId]
@@ -50,7 +52,6 @@ export const createOrder = async (buyerId: number, input: {
     const orderItems: any[] = [];
 
     for (const [sellerId, items] of sellerGroups) {
-      let sellerSubtotal = 0;
       for (const item of items) {
         const [productRows] = await conn.execute<any[]>(
           'SELECT stock, stock_version, price, name FROM products WHERE id = ? FOR UPDATE',
@@ -62,7 +63,6 @@ export const createOrder = async (buyerId: number, input: {
           throw new AppError(400, `Stock insuficiente para "${product.name}"`, 'INSUFFICIENT_STOCK');
         }
         const itemSubtotal = product.price * item.quantity;
-        sellerSubtotal += itemSubtotal;
         subtotalAmount += itemSubtotal;
         orderItems.push({ ...item, price: product.price, subtotal: itemSubtotal, sellerId: product.seller_id || item.seller_id });
       }
@@ -97,7 +97,6 @@ export const createOrder = async (buyerId: number, input: {
           `INSERT INTO order_items (order_id, seller_order_id, product_id, seller_id, quantity, unit_price, subtotal) VALUES (?, ?, ?, ?, ?, ?, ?)`,
           [orderId, sellerOrderId, item.product_id, sellerId, item.quantity, item.price, item.price * item.quantity]
         );
-
         await conn.execute(
           `UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?`,
           [item.quantity, item.product_id, item.quantity]
@@ -119,8 +118,11 @@ export const createOrder = async (buyerId: number, input: {
     );
 
     logger.info('Orders', 'Orden creada', { orderId, buyerId, totalAmount });
-    return getOrderById(orderId, buyerId);
+    createdOrderId = orderId;
   });
+
+  
+  return getOrderById(createdOrderId, buyerId);
 };
 
 export const getMyOrders = async (userId: number, queryParams: { page?: string; limit?: string }) => {
@@ -162,7 +164,7 @@ export const getOrderById = async (orderId: number, userId?: number) => {
       throw new AppError(403, 'No tienes acceso a esta orden', 'FORBIDDEN');
   }
 
-  // ✅ Pasar SIEMPRE como array
+
   const enriched = await enrichOrders([order]);
   return enriched[0]; // ← devolver solo el primero
 };

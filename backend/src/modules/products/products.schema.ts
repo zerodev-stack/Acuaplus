@@ -16,12 +16,12 @@ export const createProductSchema = z.object({
     spec_value: z.string().max(200),
     spec_type: z.enum(['text', 'number', 'range']).default('text'),
   })).optional(),
-  images: z.array(z.object({
-    image_url: z.string().url().optional(),
-    alt_text: z.string().max(150).optional(),
-    source: z.enum(['url']),
-    is_primary: z.boolean().default(false),
-  })).optional(),
+images: z.array(z.object({
+  image_url: z.string().url().optional(),
+  alt_text: z.string().max(150).optional(),
+  source: z.enum(['url', 'upload']),
+  is_primary: z.boolean().default(false),
+})).optional(),
 });
 
 export const updateProductSchema = createProductSchema.partial();
