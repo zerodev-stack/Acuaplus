@@ -43,12 +43,12 @@ export class LoginComponent {
     this.authService.login(email, password).subscribe({
       next: () => {
        const user = this.authService.currentUser;
-       if (user?.role === 'admin') {
-        this.router.navigate(['/admin']);
-       } if(user?.role === 'seller' ) {
+       if (user?.role === 'buyer') {
+        this.router.navigate(['/catalog']);
+       } else if(user?.role === 'seller' ) {
         this.router.navigate(['/dashboard']);
        } else {
-        this.router.navigate(['/catalog'])
+        this.router.navigate(['/admin'])
        }
       },
       error: (err) => {

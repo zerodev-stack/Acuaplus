@@ -17,6 +17,8 @@ export class SellerProductFormComponent implements OnInit {
   successMsg = '';
   isEditing = false;
   productId: number | null = null;
+  selectedImageFile: File | null = null;
+  selectedImageName = '';
 
   constructor(
     private fb: FormBuilder,
@@ -47,10 +49,10 @@ export class SellerProductFormComponent implements OnInit {
       sku: [''],
       price: ['', [Validators.required, Validators.min(1)]],
       stock: ['', [Validators.required, Validators.min(0)]],
-      minorderqty: [1, Validators.min(1)],
+      minorderqty: [1, [Validators.required, Validators.min(1)]],
       unit: [''],
       weightkg: [''],
-      status: ['draft'],
+      status: ['draft', Validators.required],
       imageurl: [''],
       specs: this.fb.array([]),
     });
@@ -58,8 +60,12 @@ export class SellerProductFormComponent implements OnInit {
 
   loadCategories(): void {
     this.productService.getCategories().subscribe({
-      next: (res) => (this.categories = res.data ?? []),
-      error: () => (this.errorMsg = 'No se pudieron cargar las categorías.'),
+      next: (res) => {
+        this.categories = res.data ?? [];
+      },
+      error: () => {
+        this.errorMsg = 'No se pudieron cargar las categorías.';
+      },
     });
   }
 
@@ -67,6 +73,7 @@ export class SellerProductFormComponent implements OnInit {
     this.productService.getById(id).subscribe({
       next: (res) => {
         const p = res.data;
+
         this.form.patchValue({
           name: p.name,
           categoryid: p.categoryid,
@@ -78,10 +85,12 @@ export class SellerProductFormComponent implements OnInit {
           unit: p.unit ?? '',
           weightkg: p.weightkg ?? '',
           status: p.status,
+          imageurl: '',
         });
-        // Cargar specs
+
         this.specsArray.clear();
-        (p.specs ?? []).forEach((s: any) => this.addSpec(s.speckey, s.specvalue, s.spectype));
+        (p.specs ?? []).forEach((s) => this.addSpec(s.speckey, s.specvalue, s.spectype));
+
         this.loadingData = false;
       },
       error: () => {
@@ -100,13 +109,30 @@ export class SellerProductFormComponent implements OnInit {
       this.fb.group({
         speckey: [key, Validators.required],
         specvalue: [value, Validators.required],
-        spectype: [type],
+        spectype: [type, Validators.required],
       })
     );
   }
 
   removeSpec(i: number): void {
     this.specsArray.removeAt(i);
+  }
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+
+    this.selectedImageFile = file;
+    this.selectedImageName = file?.name ?? '';
+
+    if (file) {
+      this.form.patchValue({ imageurl: '' });
+    }
+  }
+
+  clearSelectedImage(): void {
+    this.selectedImageFile = null;
+    this.selectedImageName = '';
   }
 
   onSubmit(): void {
@@ -120,31 +146,64 @@ export class SellerProductFormComponent implements OnInit {
     this.successMsg = '';
 
     const raw = this.form.value;
+
     const payload: any = {
-      categoryid: Number(raw.categoryid),
+      category_id: Number(raw.categoryid),
       name: raw.name,
       description: raw.description || undefined,
       sku: raw.sku || undefined,
       price: Number(raw.price),
       stock: Number(raw.stock),
-      minorderqty: Number(raw.minorderqty) || 1,
+      min_order_qty: Number(raw.minorderqty) || 1,
       unit: raw.unit || undefined,
-      weightkg: raw.weightkg ? Number(raw.weightkg) : undefined,
+      weight_kg: raw.weightkg ? Number(raw.weightkg) : undefined,
       status: raw.status,
-      specs: raw.specs.length > 0 ? raw.specs : undefined,
+      specs: raw.specs?.length
+        ? raw.specs.map((s: any) => ({
+            speckey: s.speckey,
+            specvalue: s.specvalue,
+            spectype: s.spectype,
+          }))
+        : undefined,
+      images: !this.selectedImageFile && raw.imageurl
+        ? [
+            {
+              imageurl: raw.imageurl,
+              source: 'url',
+              isprimary: true,
+            },
+          ]
+        : undefined,
     };
 
-    // Imagen por URL si se proporcionó
-    if (raw.imageurl) {
-      payload.images = [{ imageurl: raw.imageurl, source: 'url', isprimary: true }];
-    }
-
-    const request$ = this.isEditing && this.productId
-      ? this.productService.update(this.productId, payload)
-      : this.productService.create(payload);
+    const request$ =
+      this.isEditing && this.productId
+        ? this.productService.update(this.productId, payload)
+        : this.productService.create(payload);
 
     request$.subscribe({
-      next: () => {
+      next: (res) => {
+        const savedProductId = this.isEditing ? this.productId : res?.data?.id;
+
+        if (this.selectedImageFile && savedProductId) {
+          this.productService.uploadImage(savedProductId, this.selectedImageFile).subscribe({
+            next: () => {
+              this.loading = false;
+              this.successMsg = this.isEditing
+                ? 'Producto actualizado correctamente.'
+                : 'Producto creado correctamente.';
+              setTimeout(() => this.router.navigate(['/seller/products']), 1500);
+            },
+            error: (err) => {
+              this.loading = false;
+              this.errorMsg =
+                err.error?.error?.message ??
+                'El producto se guardó, pero la imagen no se pudo subir.';
+            },
+          });
+          return;
+        }
+
         this.loading = false;
         this.successMsg = this.isEditing
           ? 'Producto actualizado correctamente.'
@@ -153,14 +212,32 @@ export class SellerProductFormComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.errorMsg = err.error?.error?.message ?? 'Error al guardar el producto.';
+        const zodErrors = err.error?.error?.details;
+
+        if (zodErrors) {
+          this.errorMsg = zodErrors
+            .map((e: any) => `${e.path.join('.')}: ${e.message}`)
+            .join(' | ');
+        } else {
+          this.errorMsg = err.error?.error?.message ?? 'Error al guardar el producto.';
+        }
       },
     });
   }
 
-  // Getters para validación
-  get name() { return this.form.get('name')!; }
-  get categoryid() { return this.form.get('categoryid')!; }
-  get price() { return this.form.get('price')!; }
-  get stock() { return this.form.get('stock')!; }
+  get name() {
+    return this.form.get('name')!;
+  }
+
+  get categoryid() {
+    return this.form.get('categoryid')!;
+  }
+
+  get price() {
+    return this.form.get('price')!;
+  }
+
+  get stock() {
+    return this.form.get('stock')!;
+  }
 }

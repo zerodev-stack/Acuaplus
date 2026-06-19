@@ -82,14 +82,12 @@
       </div>
     </div>
 
-    <!-- Sección: Precio e inventario -->
     <div class="card border-0 shadow-sm mb-3">
       <div class="card-body">
         <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:.75rem;letter-spacing:.05em">
           <i class="bi bi-currency-dollar me-1"></i>Precio e inventario
         </h6>
         <div class="row g-3">
-          <!-- Precio -->
           <div class="col-md-4">
             <label class="form-label fw-semibold">Precio (COP) <span class="text-danger">*</span></label>
             <div class="input-group">
@@ -103,7 +101,6 @@
             </div>
           </div>
 
-          <!-- Stock -->
           <div class="col-md-4">
             <label class="form-label fw-semibold">Stock disponible <span class="text-danger">*</span></label>
             <input type="number" formControlName="stock" class="form-control"
@@ -111,27 +108,21 @@
               placeholder="0" min="0">
             <div class="invalid-feedback">El stock es obligatorio</div>
           </div>
-
-          <!-- Cantidad mínima -->
           <div class="col-md-4">
             <label class="form-label fw-semibold">Cantidad mínima de orden</label>
             <input type="number" formControlName="minorderqty" class="form-control"
               placeholder="1" min="1">
           </div>
-
-          <!-- SKU -->
           <div class="col-md-6">
             <label class="form-label fw-semibold">SKU <span class="text-muted fw-normal">(opcional)</span></label>
             <input type="text" formControlName="sku" class="form-control" placeholder="Ej. PEZ-ANG-001">
           </div>
 
-          <!-- Unidad -->
           <div class="col-md-3">
             <label class="form-label fw-semibold">Unidad <span class="text-muted fw-normal">(opcional)</span></label>
             <input type="text" formControlName="unit" class="form-control" placeholder="Ej. unidad, kg, lt">
           </div>
 
-          <!-- Peso -->
           <div class="col-md-3">
             <label class="form-label fw-semibold">Peso (kg) <span class="text-muted fw-normal">(opcional)</span></label>
             <input type="number" formControlName="weightkg" class="form-control" placeholder="0.5" min="0" step="0.1">
@@ -141,19 +132,35 @@
     </div>
 
     <!-- Sección: Imagen -->
-    <div class="card border-0 shadow-sm mb-3">
-      <div class="card-body">
-        <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:.75rem;letter-spacing:.05em">
-          <i class="bi bi-image me-1"></i>Imagen del producto
-        </h6>
-        <label class="form-label fw-semibold">URL de imagen <span class="text-muted fw-normal">(opcional)</span></label>
-        <input type="url" formControlName="imageurl" class="form-control"
-          placeholder="https://ejemplo.com/imagen.jpg">
-        <div class="form-text">Pega la URL de una imagen pública del producto.</div>
-      </div>
-    </div>
+  <div class="mb-3">
+  <label class="form-label fw-semibold">Imagen local</label>
+  <input
+    type="file"
+    class="form-control"
+    accept=".jpg,.jpeg,.png,.webp,.gif"
+    (change)="onImageSelected($event)"
+  />
+  <div class="form-text">
+    Puedes subir jpg, jpeg, png, webp o gif.
+  </div>
+  <div *ngIf="selectedImageName" class="small text-muted mt-1">
+    Archivo seleccionado: {{ selectedImageName }}
+    <button type="button" class="btn btn-link btn-sm p-0 ms-2" (click)="clearSelectedImage()">
+      Quitar
+    </button>
+  </div>
+</div>
 
-    <!-- Sección: Especificaciones técnicas -->
+<div class="mb-3">
+  <label class="form-label fw-semibold">O imagen por URL</label>
+  <input
+    type="text"
+    formControlName="imageurl"
+    class="form-control"
+    placeholder="https://ejemplo.com/imagen.jpg"
+  />
+</div>
+
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -161,12 +168,12 @@
             <i class="bi bi-list-check me-1"></i>Especificaciones técnicas
           </h6>
           <button type="button" class="btn btn-sm btn-outline-primary" (click)="addSpec()">
-            <i class="bi bi-plus me-1"></i>Agregar spec
+            <i class="bi bi-plus me-1"></i>Agregar
           </button>
         </div>
 
         <div *ngIf="specsArray.length === 0" class="text-muted small py-2">
-          No hay especificaciones. Agrega características como temperatura, pH, tamaño, etc.
+          No hay especificaciones. Agrega características de tu producto
         </div>
 
         <div formArrayName="specs">
@@ -197,7 +204,7 @@
       </div>
     </div>
 
-    <!-- Botones de acción -->
+
     <div class="d-flex justify-content-end gap-2">
       <a routerLink="/seller/products" class="btn btn-outline-secondary">Cancelar</a>
       <button type="submit" class="btn btn-primary px-4" [disabled]="loading">
