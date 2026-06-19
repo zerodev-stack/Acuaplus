@@ -206,10 +206,15 @@
 
     <div class="d-flex justify-content-end gap-2">
       <a routerLink="/seller/products" class="btn btn-outline-secondary">Cancelar</a>
-      <button type="submit" class="btn btn-primary px-4" [disabled]="loading">
-        <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
-        {{ loading ? 'Guardando...' : (isEditing ? 'Actualizar producto' : 'Publicar producto') }}
-      </button>
+      <button
+  type="submit"
+  class="btn btn-primary px-4"
+  [disabled]="loading"
+  (click)="debugClick()"
+>
+  <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+  {{ loading ? 'Guardando...' : (isEditing ? 'Actualizar producto' : 'Publicar producto') }}
+</button>
     </div>
 
   </form>

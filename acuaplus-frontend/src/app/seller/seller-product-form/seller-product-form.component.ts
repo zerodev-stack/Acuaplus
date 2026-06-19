@@ -70,40 +70,42 @@ export class SellerProductFormComponent implements OnInit {
   }
 
   loadProduct(id: number): void {
-    this.productService.getById(id).subscribe({
-      next: (res) => {
-        const p = res.data;
+  this.productService.getById(id).subscribe({
+    next: (res) => {
+      const p = res.data;
 
-        this.form.patchValue({
-          name: p.name,
-          categoryid: p.categoryid,
-          description: p.description ?? '',
-          sku: p.sku ?? '',
-          price: p.price,
-          stock: p.stock,
-          minorderqty: p.minorderqty,
-          unit: p.unit ?? '',
-          weightkg: p.weightkg ?? '',
-          status: p.status,
-          imageurl: '',
-        });
+      this.form.patchValue({
+        name: p.name,
+        categoryid: p.categoryid ?? '',
+        description: p.description ?? '',
+        sku: p.sku ?? '',
+        price: p.price ?? '',
+        stock: p.stock ?? '',
+        minorderqty: p.minorderqty ?? 1,
+        unit: p.unit ?? '',
+        weightkg: p.weightkg ?? '',
+        status: p.status ?? 'draft',
+        imageurl: '',
+      });
 
-        this.specsArray.clear();
-        (p.specs ?? []).forEach((s) => this.addSpec(s.speckey, s.specvalue, s.spectype));
+      this.specsArray.clear();
+      (p.specs ?? []).forEach((s) => this.addSpec(s.speckey, s.specvalue, s.spectype));
 
-        this.loadingData = false;
-      },
-      error: () => {
-        this.errorMsg = 'Error al cargar el producto.';
-        this.loadingData = false;
-      },
-    });
-  }
+      this.loadingData = false;
+    },
+    error: () => {
+      this.errorMsg = 'Error al cargar el producto.';
+      this.loadingData = false;
+    },
+  });
+}
 
   get specsArray(): FormArray {
     return this.form.get('specs') as FormArray;
   }
-
+debugClick(): void {
+  console.log('🖱️ botón clickeado');
+}
   addSpec(key = '', value = '', type: 'text' | 'number' | 'range' = 'text'): void {
     this.specsArray.push(
       this.fb.group({
@@ -135,109 +137,111 @@ export class SellerProductFormComponent implements OnInit {
     this.selectedImageName = '';
   }
 
-  onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+ onSubmit(): void {
+  console.log('🚀 onSubmit ejecutado');
 
-    this.loading = true;
-    this.errorMsg = '';
-    this.successMsg = '';
+  if (this.form.invalid) {
+  this.form.markAllAsTouched();
 
-    const raw = this.form.value;
-
-    const payload: any = {
-      category_id: Number(raw.categoryid),
-      name: raw.name,
-      description: raw.description || undefined,
-      sku: raw.sku || undefined,
-      price: Number(raw.price),
-      stock: Number(raw.stock),
-      min_order_qty: Number(raw.minorderqty) || 1,
-      unit: raw.unit || undefined,
-      weight_kg: raw.weightkg ? Number(raw.weightkg) : undefined,
-      status: raw.status,
-      specs: raw.specs?.length
-        ? raw.specs.map((s: any) => ({
-            speckey: s.speckey,
-            specvalue: s.specvalue,
-            spectype: s.spectype,
-          }))
-        : undefined,
-      images: !this.selectedImageFile && raw.imageurl
-        ? [
-            {
-              imageurl: raw.imageurl,
-              source: 'url',
-              isprimary: true,
-            },
-          ]
-        : undefined,
-    };
-
-    const request$ =
-      this.isEditing && this.productId
-        ? this.productService.update(this.productId, payload)
-        : this.productService.create(payload);
-
-    request$.subscribe({
-      next: (res) => {
-        const savedProductId = this.isEditing ? this.productId : res?.data?.id;
-
-        if (this.selectedImageFile && savedProductId) {
-          this.productService.uploadImage(savedProductId, this.selectedImageFile).subscribe({
-            next: () => {
-              this.loading = false;
-              this.successMsg = this.isEditing
-                ? 'Producto actualizado correctamente.'
-                : 'Producto creado correctamente.';
-              setTimeout(() => this.router.navigate(['/seller/products']), 1500);
-            },
-            error: (err) => {
-              this.loading = false;
-              this.errorMsg =
-                err.error?.error?.message ??
-                'El producto se guardó, pero la imagen no se pudo subir.';
-            },
-          });
-          return;
-        }
-
-        this.loading = false;
-        this.successMsg = this.isEditing
-          ? 'Producto actualizado correctamente.'
-          : 'Producto creado correctamente.';
-        setTimeout(() => this.router.navigate(['/seller/products']), 1500);
-      },
-      error: (err) => {
-        this.loading = false;
-        const zodErrors = err.error?.error?.details;
-
-        if (zodErrors) {
-          this.errorMsg = zodErrors
-            .map((e: any) => `${e.path.join('.')}: ${e.message}`)
-            .join(' | ');
-        } else {
-          this.errorMsg = err.error?.error?.message ?? 'Error al guardar el producto.';
-        }
-      },
+  Object.keys(this.form.controls).forEach((key) => {
+    const control = this.form.get(key);
+    console.log('CONTROL', key, {
+      value: control?.value,
+      valid: control?.valid,
+      errors: control?.errors
     });
-  }
+  });
 
-  get name() {
-    return this.form.get('name')!;
-  }
+  return;
+}
 
-  get categoryid() {
-    return this.form.get('categoryid')!;
-  }
+  this.loading = true;
+  this.errorMsg = '';
+  this.successMsg = '';
 
-  get price() {
-    return this.form.get('price')!;
-  }
+  const raw = this.form.value;
 
-  get stock() {
-    return this.form.get('stock')!;
-  }
+  const payload: any = {
+    categoryid: Number(raw.categoryid),
+    name: raw.name,
+    description: raw.description || undefined,
+    sku: raw.sku || undefined,
+    price: Number(raw.price),
+    stock: Number(raw.stock),
+    minorderqty: Number(raw.minorderqty) || 1,
+    unit: raw.unit || undefined,
+    weightkg: raw.weightkg !== '' && raw.weightkg != null ? Number(raw.weightkg) : undefined,
+    status: raw.status,
+    specs: raw.specs?.length
+      ? raw.specs.map((s: any) => ({
+          speckey: s.speckey,
+          specvalue: s.specvalue,
+          spectype: s.spectype,
+        }))
+      : undefined,
+    images: !this.selectedImageFile && raw.imageurl
+      ? [{ imageurl: raw.imageurl, source: 'url', isprimary: true }]
+      : undefined,
+  };
+
+  console.log('🟡 isEditing:', this.isEditing);
+  console.log('🟡 productId:', this.productId);
+  console.log('🟡 form value:', this.form.value);
+  console.log('🟡 payload final:', payload);
+
+  const request$ =
+    this.isEditing && this.productId
+      ? this.productService.update(this.productId, payload)
+      : this.productService.create(payload);
+
+  console.log('🟢 request mode:', this.isEditing && this.productId ? 'PATCH' : 'POST');
+
+  request$.subscribe({
+    next: (res) => {
+      const savedProductId = this.isEditing ? this.productId : res?.data?.id;
+
+      if (this.selectedImageFile && savedProductId) {
+        this.productService.uploadImage(savedProductId, this.selectedImageFile).subscribe({
+          next: () => {
+            this.loading = false;
+            this.successMsg = this.isEditing
+              ? 'Producto actualizado correctamente.'
+              : 'Producto creado correctamente.';
+            setTimeout(() => this.router.navigate(['/seller/products']), 1500);
+          },
+          error: (err) => {
+            this.loading = false;
+            this.errorMsg =
+              err.error?.error?.message ??
+              'El producto se guardó, pero la imagen no se pudo subir.';
+          },
+        });
+        return;
+      }
+
+      this.loading = false;
+      this.successMsg = this.isEditing
+        ? 'Producto actualizado correctamente.'
+        : 'Producto creado correctamente.';
+      setTimeout(() => this.router.navigate(['/seller/products']), 1500);
+    },
+    error: (err) => {
+      this.loading = false;
+      const zodErrors = err.error?.error?.details;
+
+      if (zodErrors) {
+        this.errorMsg = zodErrors
+          .map((e: any) => `${e.path.join('.')}: ${e.message}`)
+          .join(' | ');
+      } else {
+        this.errorMsg = err.error?.error?.message ?? 'Error al guardar el producto.';
+      }
+    },
+  });
+}
+
+  get name() { return this.form.get('name')!; }
+  get categoryid() { return this.form.get('categoryid')!; }
+  get price() { return this.form.get('price')!; }
+  get stock() { return this.form.get('stock')!; }
 }
