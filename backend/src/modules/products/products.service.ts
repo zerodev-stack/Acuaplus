@@ -25,7 +25,7 @@ export const createProduct = async (sellerId: number, input: CreateProductInput)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         sellerProfileId,
-        input.category_id,
+        input.categoryid,
         input.name,
         input.description ?? null,
         input.sku ?? null,
@@ -52,24 +52,28 @@ export const createProduct = async (sellerId: number, input: CreateProductInput)
       }
     }
 
-    if (input.images?.length) {
-      for (let i = 0; i < input.images.length; i++) {
-        const img = input.images[i];
-        await conn.execute(
-          `INSERT INTO product_images
-           (product_id, image_url, alt_text, source, is_primary, display_order)
-           VALUES (?, ?, ?, ?, ?, ?)`,
-          [
-            newProductId,
-            img.image_url ?? null,
-            img.alt_text ?? null,
-            img.source,
-            img.is_primary ? 1 : 0,
-            i,
-          ]
-        );
-      }
-    }
+   if (input.images?.length) {
+  const hasPrimary = input.images.some((img) => !!img.is_primary);
+
+  for (let i = 0; i < input.images.length; i++) {
+    const img = input.images[i];
+    const isPrimary = hasPrimary ? (img.is_primary ? 1 : 0) : i === 0 ? 1 : 0;
+
+    await conn.execute(
+      `INSERT INTO product_images
+       (product_id, image_url, alt_text, source, is_primary, display_order)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        newProductId,
+        img.image_url ?? null,
+        img.alt_text ?? null,
+        img.source,
+        isPrimary,
+        i,
+      ]
+    );
+  }
+}
 
     logger.info('Products', 'Producto creado', { productId: newProductId, sellerId });
     return newProductId;
@@ -370,21 +374,29 @@ export const addProductImage = async (
 ) => {
   await verifyProductOwner(productId, userId);
 
-  if (file) {
-    const filePath = file.filename;
+  const existingImages = await query<{ total: number }[]>(
+    `SELECT COUNT(*) AS total
+     FROM product_images
+     WHERE product_id = ? AND image_url IS NOT NULL AND image_url <> ''`,
+    [productId]
+  );
 
+  const isPrimary = existingImages[0].total === 0 ? 1 : 0;
+  const displayOrder = existingImages[0].total;
+
+  if (file) {
     await query(
       `INSERT INTO product_images
-       (product_id, file_path, image_url, source, alt_text)
-       VALUES (?, ?, ?, ?, ?)`,
-      [productId, filePath, `/uploads/${file.filename}`, 'upload', file.originalname]
+       (product_id, file_path, image_url, source, alt_text, is_primary, display_order)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [productId, file.filename, `/uploads/${file.filename}`, 'upload', file.originalname, isPrimary, displayOrder]
     );
-  } else if (imageUrl) {
+  } else if (imageUrl && imageUrl.trim() !== '') {
     await query(
       `INSERT INTO product_images
-       (product_id, image_url, source)
-       VALUES (?, ?, ?)`,
-      [productId, imageUrl, 'url']
+       (product_id, image_url, source, is_primary, display_order)
+       VALUES (?, ?, ?, ?, ?)`,
+      [productId, imageUrl.trim(), 'url', isPrimary, displayOrder]
     );
   } else {
     throw new AppError(400, 'Debe proporcionar un archivo o una URL', 'IMAGE_REQUIRED');
