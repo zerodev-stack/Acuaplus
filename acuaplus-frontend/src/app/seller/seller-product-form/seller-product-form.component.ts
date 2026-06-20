@@ -209,7 +209,7 @@ debugClick(): void {
               : 'Producto creado correctamente.';
             setTimeout(() => this.router.navigate(['/seller/products']), 1500);
           },
-          error: (err) => {
+          error: (err: any) => {
             this.loading = false;
             this.errorMsg =
               err.error?.error?.message ??
@@ -225,7 +225,7 @@ debugClick(): void {
         : 'Producto creado correctamente.';
       setTimeout(() => this.router.navigate(['/seller/products']), 1500);
     },
-    error: (err) => {
+    error: (err: any) => {
       this.loading = false;
       const zodErrors = err.error?.error?.details;
 

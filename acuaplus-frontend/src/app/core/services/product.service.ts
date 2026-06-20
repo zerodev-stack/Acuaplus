@@ -270,10 +270,7 @@ private mapImage(image: any): ProductImage {
   }
 
   delete(id: number) {
-    return this.http.delete<any>(`${this.baseUrl}/products/${id}`, {
-      withCredentials: true,
-      headers: this.buildAuthHeaders()
-    });
+    return this.api.delete<any>(`products/${id}`);
   }
 
   addImageByUrl(productId: number, imageUrl: string) {
@@ -284,13 +281,7 @@ private mapImage(image: any): ProductImage {
     const formData = new FormData();
     formData.append('image', file);
 
-    return this.http.post<any>(
-      `${this.baseUrl}/products/${productId}/images`,
-      formData,
-      {
-        withCredentials: true
-      }
-    );
+    return this.api.post<any>(`products/${productId}/images`, formData);
   }
 
   getCategories() {
