@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  acuaplus-frontend:
+    build: .
+    container_name: acuaplus-frontend
+    ports:
+      - "4200:4200"
+    restart: always
