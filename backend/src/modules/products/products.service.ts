@@ -124,7 +124,7 @@ export const getProductById = async (productId: number) => {
 export const listProducts = async (filters: {
   page?: string;
   limit?: string;
-  category_id?: string;
+  categoryid?: string;
   seller_id?: string;
   search?: string;
   min_price?: string;
@@ -136,9 +136,9 @@ export const listProducts = async (filters: {
   const conditions: string[] = ['p.deleted_at IS NULL'];
   const params: unknown[] = [];
 
-  if (filters.category_id) {
+  if (filters.categoryid) {
     conditions.push('p.category_id = ?');
-    params.push(parseInt(filters.category_id, 10));
+    params.push(parseInt(filters.categoryid, 10));
   }
 
   if (filters.seller_id) {
@@ -303,7 +303,7 @@ export const updateProduct = async (productId: number, userId: number, input: Up
   await verifyProductOwner(productId, userId);
 
   const allowedFields = [
-    'category_id',
+    'categoryid',
     'name',
     'description',
     'sku',
@@ -320,7 +320,8 @@ export const updateProduct = async (productId: number, userId: number, input: Up
 
   for (const [key, value] of Object.entries(input)) {
     if (allowedFields.includes(key) && value !== undefined) {
-      sets.push(`${key} = ?`);
+      const dbKey = key === 'categoryid' ? 'category_id' : key;
+      sets.push(`${dbKey} = ?`);
       values.push(value);
     }
   }

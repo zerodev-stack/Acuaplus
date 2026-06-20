@@ -32,7 +32,7 @@ describe('Products Service', () => {
     it('should create a product successfully', async () => {
       const sellerId = 1;
       const input = {
-        category_id: 1,
+        categoryid: 1,
         name: 'Test Product',
         description: 'A test product',
         sku: 'SKU123',
@@ -83,7 +83,7 @@ describe('Products Service', () => {
     it('should throw error if seller profile not found', async () => {
       const sellerId = 999;
       const input = {
-        category_id: 1,
+        categoryid: 1,
         name: 'Test Product',
         description: 'A test product',
         price: 100,
@@ -156,7 +156,7 @@ describe('Products Service', () => {
     });
 
     it('should filter products by category', async () => {
-      const filters = { page: '1', limit: '10', category_id: '1' };
+      const filters = { page: '1', limit: '10', categoryid: '1' };
 
       mockQuery
         .mockResolvedValueOnce([{ total: 1 }])
