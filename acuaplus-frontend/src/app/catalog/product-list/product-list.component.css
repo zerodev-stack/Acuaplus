@@ -94,7 +94,7 @@
 
 @media (min-width: 768px) {
   .promo-slide {
-    height: 200px;
+    height: 400px;
   }
 }
 
@@ -190,13 +190,13 @@
     width: 100%;
     max-width: 100%;
     border-radius: 1rem;
-   
+
   }
 
   .search-box:focus-within {
     max-width: 100%;
     transform: none;
-    
+
   }
 
   .promo-slide {
