@@ -1,0 +1,118 @@
+<!-- src/app/reviews/review-list/review-list.component.html -->
+<div class="reviews-section">
+
+  <!-- Encabezado con resumen -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <h5 class="mb-0 fw-bold">Reseñas</h5>
+      <span class="text-muted small">({{ total }})</span>
+    </div>
+
+    <!-- Botón para calificar (solo compradores con orden entregada) -->
+    <button
+      *ngIf="isBuyer && orderId && !showForm"
+      class="btn btn-outline-primary btn-sm"
+      (click)="showForm = true">
+      <i class="bi bi-star me-1"></i>Calificar
+    </button>
+  </div>
+
+  <!-- Promedio general -->
+  <div *ngIf="total > 0" class="d-flex align-items-center gap-2 mb-3">
+    <span class="fs-3 fw-bold text-warning">{{ getAvgRating() }}</span>
+    <div>
+      <div class="star-row d-flex gap-1">
+        <i *ngFor="let s of getStars(getAvgRating())"
+           class="bi"
+           [ngClass]="s.filled ? 'bi-star-fill text-warning' : 'bi-star text-muted'">
+        </i>
+      </div>
+      <small class="text-muted">{{ total }} calificación{{ total !== 1 ? 'es' : '' }}</small>
+    </div>
+  </div>
+
+  <!-- Formulario de nueva reseña -->
+  <div *ngIf="showForm && orderId" class="mb-4">
+    <app-review-form
+      [productId]="productId"
+      [orderId]="orderId"
+      (reviewCreated)="onReviewCreated($event)">
+    </app-review-form>
+    <button class="btn btn-link btn-sm text-muted mt-1" (click)="showForm = false">
+      Cancelar
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-4">
+    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger py-2">{{ error }}</div>
+
+  <!-- Sin reseñas -->
+  <div *ngIf="!loading && reviews.length === 0 && !error"
+       class="text-center py-4 text-muted">
+    <i class="bi bi-chat-square-text fs-2 d-block mb-2"></i>
+    <p class="small">Aún no hay reseñas para este producto.</p>
+  </div>
+
+  <!-- Lista de reseñas -->
+  <div *ngIf="!loading" class="reviews-list">
+    <div *ngFor="let r of reviews" class="review-item border-bottom py-3">
+
+      <div class="d-flex justify-content-between align-items-start mb-1">
+        <div class="d-flex align-items-center gap-2">
+          <!-- Avatar inicial -->
+          <div class="avatar-circle bg-primary text-white">
+            {{ r.buyer_name.charAt(0).toUpperCase() }}
+          </div>
+          <div>
+            <span class="fw-semibold small">{{ r.buyer_name }}</span>
+            <span *ngIf="r.is_verified"
+                  class="badge bg-success ms-1"
+                  title="Compra verificada"
+                  style="font-size: 0.65rem;">
+              <i class="bi bi-check2"></i> Verificado
+            </span>
+          </div>
+        </div>
+        <small class="text-muted">{{ formatDate(r.created_at) }}</small>
+      </div>
+
+      <!-- Estrellas individuales -->
+      <div class="d-flex gap-1 mb-1">
+        <i *ngFor="let s of getStars(r.rating)"
+           class="bi bi-star-fill"
+           [ngClass]="s.filled ? 'text-warning' : 'text-muted opacity-25'"
+           style="font-size: 0.85rem;">
+        </i>
+      </div>
+
+      <!-- Comentario -->
+      <p *ngIf="r.comment" class="mb-0 small text-dark">{{ r.comment }}</p>
+      <p *ngIf="!r.comment" class="mb-0 small text-muted fst-italic">Sin comentario.</p>
+    </div>
+  </div>
+
+  <!-- Paginación -->
+  <nav *ngIf="totalPages > 1" class="mt-3 d-flex justify-content-center">
+    <ul class="pagination pagination-sm">
+      <li class="page-item" [class.disabled]="page === 1">
+        <button class="page-link" (click)="changePage(page - 1)">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+      </li>
+      <li *ngFor="let p of getPages()" class="page-item" [class.active]="p === page">
+        <button class="page-link" (click)="changePage(p)">{{ p }}</button>
+      </li>
+      <li class="page-item" [class.disabled]="page === totalPages">
+        <button class="page-link" (click)="changePage(page + 1)">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+</div>

@@ -1,0 +1,364 @@
+<div class="container py-4" style="max-width: 720px;">
+
+  <!-- STEPPER VISUAL -->
+  <div class="d-flex align-items-center mb-4 gap-2" *ngIf="currentStep !== 'processing'">
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge rounded-pill"
+        [class.bg-primary]="currentStep === 'address'"
+        [class.bg-success]="currentStep !== 'address' && currentStep !== 'error'"
+        [class.bg-secondary]="currentStep === 'error'">1</span>
+      <span class="small fw-semibold">Dirección</span>
+    </div>
+    <div class="flex-grow-1 border-top"></div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge rounded-pill"
+        [class.bg-primary]="currentStep === 'payment'"
+        [class.bg-success]="currentStep === 'confirmation'"
+        [class.bg-secondary]="currentStep === 'address' || currentStep === 'error'">2</span>
+      <span class="small fw-semibold">Pago</span>
+    </div>
+    <div class="flex-grow-1 border-top"></div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge rounded-pill"
+        [class.bg-success]="currentStep === 'confirmation'"
+        [class.bg-secondary]="currentStep !== 'confirmation'">3</span>
+      <span class="small fw-semibold">Confirmación</span>
+    </div>
+  </div>
+
+  <!-- ── PASO 1: DIRECCIÓN ── -->
+  <div *ngIf="currentStep === 'address'">
+    <h5 class="fw-bold mb-3">¿A dónde enviamos tu pedido?</h5>
+
+    <div *ngIf="loadingAddresses" class="text-center py-4">
+      <div class="spinner-border spinner-border-sm text-primary"></div>
+      <p class="small text-muted mt-2">Cargando direcciones...</p>
+    </div>
+
+    <div *ngIf="!loadingAddresses">
+      <!-- Lista de direcciones -->
+      <div *ngFor="let addr of addresses"
+        class="card border mb-2 cursor-pointer"
+        [class.border-primary]="selectedAddressId === addr.id"
+        [class.bg-primary]="selectedAddressId === addr.id"
+        [class.bg-opacity-10]="selectedAddressId === addr.id"
+        (click)="selectAddress(addr.id)"
+        style="cursor: pointer;">
+        <div class="card-body py-3">
+          <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-geo-alt-fill text-primary mt-1"></i>
+            <div>
+              <p class="mb-0 fw-semibold">{{ addr.address_line }}</p>
+              <p class="mb-0 text-muted small">{{ addr.city }}, {{ addr.department }}
+                <span *ngIf="addr.zip_code"> · CP {{ addr.zip_code }}</span>
+              </p>
+              <span *ngIf="addr.is_default === 1" class="badge bg-success bg-opacity-75 mt-1">Predeterminada</span>
+            </div>
+            <i class="bi ms-auto"
+              [class.bi-check-circle-fill]="selectedAddressId === addr.id"
+              [class.text-primary]="selectedAddressId === addr.id"
+              [class.bi-circle]="selectedAddressId !== addr.id"
+              [class.text-muted]="selectedAddressId !== addr.id"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sin direcciones -->
+      <div *ngIf="addresses.length === 0 && !showNewAddressForm"
+        class="text-center py-4 text-muted">
+        <i class="bi bi-geo fs-2"></i>
+        <p class="mt-2">No tienes direcciones guardadas.</p>
+      </div>
+
+      <!-- Botón agregar nueva -->
+      <button class="btn btn-outline-secondary btn-sm mt-2 w-100"
+        *ngIf="!showNewAddressForm"
+        (click)="showNewAddressForm = true">
+        <i class="bi bi-plus me-1"></i> Agregar nueva dirección
+      </button>
+
+      <!-- Formulario nueva dirección -->
+      <div *ngIf="showNewAddressForm" class="card border-0 shadow-sm mt-3">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-3">Nueva dirección</h6>
+          <form [formGroup]="newAddressForm">
+            <div class="mb-3">
+              <div class="mb-3">
+  <label class="form-label fw-semibold small">Nombre del destinatario</label>
+  <input type="text" class="form-control" formControlName="recipient_name"
+    placeholder="Ej: Juan Pérez"
+    [class.is-invalid]="newAddressForm.get('recipient_name')?.invalid && newAddressForm.get('recipient_name')?.touched">
+  <div class="invalid-feedback">Mínimo 2 caracteres</div>
+</div>
+              <label class="form-label fw-semibold small">Dirección</label>
+              <input type="text" class="form-control" formControlName="address_line"
+                placeholder="Ej: Cra 10 #25-30"
+                [class.is-invalid]="newAddressForm.get('address_line')?.invalid && newAddressForm.get('address_line')?.touched">
+              <div class="invalid-feedback">Mínimo 5 caracteres</div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Ciudad</label>
+                <input type="text" class="form-control" formControlName="city" placeholder="Ej: Bogotá"
+                  [class.is-invalid]="newAddressForm.get('city')?.invalid && newAddressForm.get('city')?.touched">
+                <div class="invalid-feedback">Requerido</div>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold small">Departamento</label>
+                <input type="text" class="form-control" formControlName="department" placeholder="Ej: Cundinamarca"
+                  [class.is-invalid]="newAddressForm.get('department')?.invalid && newAddressForm.get('department')?.touched">
+                <div class="invalid-feedback">Requerido</div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold small">Código postal <span class="text-muted fw-normal">(opcional)</span></label>
+              <input type="text" class="form-control" formControlName="zip_code" placeholder="Ej: 110111">
+            </div>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-primary btn-sm"
+                [disabled]="savingAddress" (click)="saveNewAddress()">
+                <span *ngIf="savingAddress" class="spinner-border spinner-border-sm me-1"></span>
+                Guardar dirección
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-sm"
+                (click)="showNewAddressForm = false">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Notas del pedido -->
+     <!-- Reemplaza el card de notas completo -->
+<div class="card border-0 shadow-sm mt-3">
+  <div class="card-body">
+    <form [formGroup]="notesForm">
+      <label class="form-label fw-semibold small">
+        Notas del pedido 
+        <span class="text-muted fw-normal">(opcional)</span>
+      </label>
+      <textarea 
+        class="form-control" 
+        rows="2" 
+        formControlName="notes"
+        placeholder="Instrucciones especiales de entrega...">
+      </textarea>
+    </form>
+  </div>
+</div>
+
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <a routerLink="/cart" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Volver al carrito
+        </a>
+        <button class="btn btn-primary"
+          [disabled]="!selectedAddressId"
+          (click)="goToPayment()">
+          Continuar al pago <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PASO 2: MÉTODO DE PAGO ── -->
+  <div *ngIf="currentStep === 'payment'">
+    <h5 class="fw-bold mb-3">¿Cómo quieres pagar?</h5>
+
+    <!-- Métodos de pago -->
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+      <button class="btn btn-sm flex-fill"
+        [class.btn-primary]="paymentMethod === 'card'"
+        [class.btn-outline-secondary]="paymentMethod !== 'card'"
+        (click)="selectPaymentMethod('card')">
+        <i class="bi bi-credit-card me-1"></i> Tarjeta
+      </button>
+      <button class="btn btn-sm flex-fill"
+        [class.btn-primary]="paymentMethod === 'transfer'"
+        [class.btn-outline-secondary]="paymentMethod !== 'transfer'"
+        (click)="selectPaymentMethod('transfer')">
+        <i class="bi bi-bank me-1"></i> Transferencia
+      </button>
+      <button class="btn btn-sm flex-fill"
+        [class.btn-primary]="paymentMethod === 'cashondelivery'"
+        [class.btn-outline-secondary]="paymentMethod !== 'cashondelivery'"
+        (click)="selectPaymentMethod('cashondelivery')">
+        <i class="bi bi-cash me-1"></i> Contra entrega
+      </button>
+    </div>
+
+    <!-- Sección tarjetas guardadas -->
+    <div *ngIf="paymentMethod === 'card'">
+      <div *ngIf="loadingCards" class="text-center py-3">
+        <div class="spinner-border spinner-border-sm text-primary"></div>
+      </div>
+
+      <div *ngIf="!loadingCards">
+        <div *ngFor="let card of savedCards"
+          class="card border mb-2"
+          [class.border-primary]="selectedCardId === card.id"
+          [class.bg-primary]="selectedCardId === card.id"
+          [class.bg-opacity-10]="selectedCardId === card.id"
+          (click)="selectCard(card.id)"
+          style="cursor: pointer;">
+          <div class="card-body py-3">
+            <div class="d-flex align-items-center gap-3">
+              <i class="bi fs-4 text-muted" [class]="cardBrandIcon(card.brand)"></i>
+              <div class="flex-grow-1">
+                <p class="mb-0 fw-semibold">···· {{ card.last_four }}</p>
+                <p class="mb-0 text-muted small">
+                  {{ card.cardholder_name }} · Vence {{ card.exp_month }}/{{ card.exp_year }}
+                </p>
+              </div>
+              <i class="bi"
+                [class.bi-check-circle-fill]="selectedCardId === card.id"
+                [class.text-primary]="selectedCardId === card.id"
+                [class.bi-circle]="selectedCardId !== card.id"
+                [class.text-muted]="selectedCardId !== card.id"></i>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="savedCards.length === 0 && !showNewCardForm" class="text-center py-3 text-muted">
+          <i class="bi bi-credit-card fs-2"></i>
+          <p class="mt-2 small">No tienes tarjetas guardadas.</p>
+        </div>
+
+        <button class="btn btn-outline-secondary btn-sm w-100 mt-2"
+          *ngIf="!showNewCardForm"
+          (click)="showNewCardForm = true">
+          <i class="bi bi-plus me-1"></i> Agregar nueva tarjeta
+        </button>
+
+        <!-- Formulario nueva tarjeta -->
+        <div *ngIf="showNewCardForm" class="card border-0 shadow-sm mt-3">
+          <div class="card-body">
+            <h6 class="fw-semibold mb-3">Nueva tarjeta</h6>
+            <form [formGroup]="newCardForm">
+              <div class="mb-3">
+                <label class="form-label fw-semibold small">Nombre del titular</label>
+                <input type="text" class="form-control" formControlName="cardholder_name"
+                  placeholder="Como aparece en la tarjeta"
+                  [class.is-invalid]="newCardForm.get('cardholder_name')?.invalid && newCardForm.get('cardholder_name')?.touched">
+                <div class="invalid-feedback">Requerido</div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold small">Número de tarjeta</label>
+                <input type="text" class="form-control" formControlName="pan"
+                  placeholder="0000 0000 0000 0000" maxlength="19"
+                  [class.is-invalid]="newCardForm.get('pan')?.invalid && newCardForm.get('pan')?.touched">
+                <div class="invalid-feedback">13-19 dígitos</div>
+              </div>
+              <div class="row g-2 mb-3">
+                <div class="col-4">
+                  <label class="form-label fw-semibold small">Mes exp.</label>
+                  <input type="number" class="form-control" formControlName="exp_month"
+                    placeholder="MM" min="1" max="12"
+                    [class.is-invalid]="newCardForm.get('exp_month')?.invalid && newCardForm.get('exp_month')?.touched">
+                </div>
+                <div class="col-4">
+                  <label class="form-label fw-semibold small">Año exp.</label>
+                  <input type="number" class="form-control" formControlName="exp_year"
+                    placeholder="AAAA" min="2024" max="2040"
+                    [class.is-invalid]="newCardForm.get('exp_year')?.invalid && newCardForm.get('exp_year')?.touched">
+                </div>
+                <div class="col-4">
+                  <label class="form-label fw-semibold small">CVV</label>
+                  <input type="password" class="form-control" formControlName="cvv"
+                    placeholder="···" maxlength="4"
+                    [class.is-invalid]="newCardForm.get('cvv')?.invalid && newCardForm.get('cvv')?.touched">
+                </div>
+              </div>
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" formControlName="is_default" id="isDefault">
+                <label class="form-check-label small" for="isDefault">Guardar como tarjeta predeterminada</label>
+              </div>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-primary btn-sm"
+                  [disabled]="savingCard" (click)="saveNewCard()">
+                  <span *ngIf="savingCard" class="spinner-border spinner-border-sm me-1"></span>
+                  Guardar tarjeta
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm"
+                  (click)="showNewCardForm = false">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transferencia -->
+    <div *ngIf="paymentMethod === 'transfer'" class="alert alert-info">
+      <i class="bi bi-info-circle me-2"></i>
+      Recibirás los datos bancarios por correo para completar tu transferencia.
+    </div>
+
+    <!-- Contra entrega -->
+    <div *ngIf="paymentMethod === 'cashondelivery'" class="alert alert-warning">
+      <i class="bi bi-truck me-2"></i>
+      Pagarás en efectivo al recibir tu pedido.
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+      <button class="btn btn-outline-secondary btn-sm" (click)="currentStep = 'address'">
+        <i class="bi bi-arrow-left me-1"></i> Volver
+      </button>
+      <button class="btn btn-success fw-semibold"
+        [disabled]="paymentMethod === 'card' && !selectedCardId"
+        (click)="confirmOrder()">
+        <i class="bi bi-lock me-1"></i> Confirmar y pagar
+      </button>
+    </div>
+  </div>
+
+  <!-- ── PROCESANDO ── -->
+  <div *ngIf="currentStep === 'processing'" class="text-center py-5">
+    <div class="spinner-border text-primary mb-3"></div>
+    <h5 class="fw-semibold">Procesando tu pago...</h5>
+    <p class="text-muted small">Por favor no cierres esta ventana.</p>
+  </div>
+
+  <!-- ── CONFIRMACIÓN ── -->
+  <div *ngIf="currentStep === 'confirmation'">
+
+    <!-- Pago aprobado -->
+    <div *ngIf="paymentStatus === 'approved'" class="text-center py-4">
+      <div class="mb-3" style="font-size: 3rem;">✅</div>
+      <h4 class="fw-bold text-success">¡Pago aprobado!</h4>
+      <p class="text-muted">Tu orden <strong>#{{ createdOrder?.id }}</strong> ha sido confirmada.</p>
+      <p class="text-muted small">Total pagado: <strong>{{ formatPrice(createdOrder?.total_amount ?? 0) }}</strong></p>
+      <div class="d-flex gap-2 justify-content-center mt-4">
+        <button class="btn btn-outline-primary" (click)="goToOrders()">Ver mis órdenes</button>
+        <button class="btn btn-primary" (click)="goToHome()">Ir al inicio</button>
+      </div>
+    </div>
+
+    <!-- Pago rechazado / fallido -->
+    <div *ngIf="paymentStatus !== 'approved'" class="text-center py-4">
+      <div class="mb-3" style="font-size: 3rem;">❌</div>
+      <h4 class="fw-bold text-danger">Pago no procesado</h4>
+      <p class="text-muted">
+        Estado: <strong>{{ paymentStatus }}</strong><br>
+        Tu orden <strong>#{{ createdOrder?.id }}</strong> fue creada pero el pago falló.
+      </p>
+      <div class="d-flex gap-2 justify-content-center mt-4" *ngIf="selectedCardId">
+        <button class="btn btn-warning" [disabled]="processing" (click)="retryPayment()">
+          <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
+          Reintentar pago
+        </button>
+        <button class="btn btn-outline-secondary" (click)="goToOrders()">Ver mis órdenes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ERROR AL CREAR ORDEN ── -->
+  <div *ngIf="currentStep === 'error'" class="text-center py-4">
+    <div class="mb-3" style="font-size: 3rem;">⚠️</div>
+    <h4 class="fw-bold">No se pudo crear la orden</h4>
+    <p class="text-muted">{{ errorMsg }}</p>
+    <div class="d-flex gap-2 justify-content-center mt-4">
+      <button class="btn btn-outline-secondary" (click)="currentStep = 'payment'">Volver</button>
+      <a routerLink="/cart" class="btn btn-primary">Ir al carrito</a>
+    </div>
+  </div>
+
+</div>

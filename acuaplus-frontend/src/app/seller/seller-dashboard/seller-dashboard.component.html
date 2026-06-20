@@ -1,0 +1,126 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" routerLink="/dashboard">
+      <span>🐠</span> Acuaplus <span class="badge bg-light text-primary ms-1" style="font-size:0.65rem">Vendedor</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navSeller">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navSeller">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link active" routerLink="/dashboard">
+            <i class="bi bi-speedometer2 me-1"></i>Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/seller/products">
+            <i class="bi bi-box-seam me-1"></i>Mis Productos
+          </a>
+        </li>
+      </ul>
+      <div class="dropdown">
+        <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          <i class="bi bi-person-circle me-1"></i>{{ user?.name }}
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><span class="dropdown-item-text small text-muted">{{ user?.email }}</span></li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <button class="dropdown-item text-danger" (click)="logout()">
+              <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Contenido -->
+<div class="container py-4">
+  <!-- Saludo -->
+  <div class="mb-4">
+    <h2 class="fw-bold mb-1">Hola, {{ firstName }} 👋</h2>
+    <p class="text-muted">Panel de vendedor — resumen de tu actividad</p>
+  </div>
+
+  <!-- Cards estadísticas -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-muted small mb-1">Productos publicados</p>
+          <h3 class="fw-bold mb-0" *ngIf="!loading">{{ stats.products }}</h3>
+          <div *ngIf="loading" class="placeholder-glow"><span class="placeholder col-4" style="height:2rem;display:block"></span></div>
+          <span class="fs-3">📦</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-muted small mb-1">Órdenes totales</p>
+          <h3 class="fw-bold mb-0" *ngIf="!loading">{{ stats.orders }}</h3>
+          <div *ngIf="loading" class="placeholder-glow"><span class="placeholder col-4" style="height:2rem;display:block"></span></div>
+          <span class="fs-3">🛒</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-muted small mb-1">Órdenes pendientes</p>
+          <h3 class="fw-bold mb-0" *ngIf="!loading">{{ stats.pendingOrders }}</h3>
+          <div *ngIf="loading" class="placeholder-glow"><span class="placeholder col-4" style="height:2rem;display:block"></span></div>
+          <span class="fs-3">⏳</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card border-0 bg-primary text-white shadow-sm h-100">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <p class="small mb-2 opacity-75">Acción rápida</p>
+          <p class="fw-semibold mb-2" style="font-size:0.9rem">Publicar nuevo producto</p>
+          <a routerLink="/seller/products/new" class="btn btn-light btn-sm text-primary fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i>Agregar
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Órdenes recientes -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+      <h6 class="fw-bold mb-0"><i class="bi bi-receipt me-2"></i>Órdenes recientes</h6>
+    </div>
+    <div class="card-body p-0">
+      <div *ngIf="loading" class="p-4 text-center text-muted">
+        <div class="spinner-border spinner-border-sm me-2"></div>Cargando...
+      </div>
+      <div *ngIf="!loading && recentOrders.length === 0" class="p-4 text-center text-muted">
+        <i class="bi bi-inbox fs-2 d-block mb-2"></i>Aún no tienes órdenes
+      </div>
+      <table *ngIf="!loading && recentOrders.length > 0" class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="small">ID</th>
+            <th class="small">Subtotal</th>
+            <th class="small">Estado</th>
+            <th class="small">Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of recentOrders">
+            <td class="small fw-semibold">#{{ order.id }}</td>
+            <td class="small">{{ formatPrice(order.subtotal) }}</td>
+            <td><span [class]="statusClass(order.status)">{{ statusLabel(order.status) }}</span></td>
+            <td class="small text-muted">{{ order.createdat }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,31 @@
+<div class="d-flex flex-wrap gap-2 mb-4">
+  <!-- Skeleton mientras carga -->
+  <ng-container *ngIf="loading">
+    <span *ngFor="let i of [1,2,3,4,5]"
+      class="placeholder rounded-pill"
+      style="width: 80px; height: 32px;">
+    </span>
+  </ng-container>
+
+  <!-- Chips de categorías -->
+  <ng-container *ngIf="!loading">
+    <!-- Chip "Todas" -->
+    <button
+      class="btn btn-sm rounded-pill"
+      [class.btn-primary]="selectedId === null"
+      [class.btn-outline-secondary]="selectedId !== null"
+      (click)="select(null)">
+      Todas
+    </button>
+
+    <!-- Una categoría por chip -->
+    <button
+      *ngFor="let cat of categories"
+      class="btn btn-sm rounded-pill"
+      [class.btn-primary]="selectedId === cat.id"
+      [class.btn-outline-secondary]="selectedId !== cat.id"
+      (click)="select(cat.id)">
+      {{ cat.name }}
+    </button>
+  </ng-container>
+</div>

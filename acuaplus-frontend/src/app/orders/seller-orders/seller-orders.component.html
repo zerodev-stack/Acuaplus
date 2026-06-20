@@ -1,0 +1,146 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+      <h4 class="fw-bold mb-0">Mis ventas</h4>
+      <p class="text-muted small mb-0">{{ total }} orden(es) recibida(s)</p>
+    </div>
+  </div>
+
+  <!-- Filtros de estado -->
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <button *ngFor="let opt of statusOptions"
+            class="btn btn-sm rounded-pill"
+            [class.btn-primary]="selectedStatus === opt.value"
+            [class.btn-outline-secondary]="selectedStatus !== opt.value"
+            (click)="filterByStatus(opt.value)">
+      {{ opt.label }}
+    </button>
+  </div>
+
+  <!-- Skeleton -->
+  <div *ngIf="loading">
+    <div *ngFor="let i of [1,2,3]" class="card border-0 shadow-sm mb-3">
+      <div class="card-body placeholder-glow">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="placeholder col-3"></span>
+          <span class="placeholder col-2"></span>
+        </div>
+        <span class="placeholder col-5 d-block mb-1"></span>
+        <span class="placeholder col-2"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error && !loading" class="alert alert-warning d-flex gap-2 align-items-center">
+    <i class="bi bi-exclamation-triangle"></i>
+    No se pudieron cargar las ventas.
+    <button class="btn btn-sm btn-warning ms-auto" (click)="loadOrders()">Reintentar</button>
+  </div>
+
+  <!-- Sin órdenes -->
+  <div *ngIf="!loading && !error && orders.length === 0" class="text-center py-5">
+    <i class="bi bi-bag-x fs-1 text-muted"></i>
+    <p class="text-muted mt-2">No hay órdenes con este estado.</p>
+  </div>
+
+  <!-- Lista -->
+  <div *ngFor="let order of orders" class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <p class="fw-semibold mb-1">
+            Sub-orden #{{ order.id }}
+            <span class="text-muted fw-normal small ms-1">
+              (Orden #{{ order.order_id }})
+            </span>
+          </p>
+          <p class="text-muted small mb-0">
+            Subtotal: <strong>{{ formatPrice(order.subtotal) }}</strong>
+          </p>
+          <p *ngIf="order.tracking_code" class="text-muted small mb-0">
+            <i class="bi bi-truck me-1"></i>{{ order.tracking_code }}
+          </p>
+        </div>
+        <span class="badge {{ statusClass(order.status) }}" style="font-size:0.75rem">
+          {{ statusLabel(order.status) }}
+        </span>
+      </div>
+    </div>
+
+    <div class="card-footer bg-transparent d-flex justify-content-between align-items-center py-2">
+      <button class="btn btn-link btn-sm ps-0 text-muted"
+              (click)="viewDetail(order.order_id)">
+        <i class="bi bi-eye me-1"></i>Ver orden completa
+      </button>
+      <button *ngIf="getNextOptions(order.status).length > 0"
+              class="btn btn-primary btn-sm"
+              (click)="openUpdate(order)">
+        <i class="bi bi-pencil me-1"></i>Actualizar estado
+      </button>
+    </div>
+  </div>
+
+  <!-- Paginación -->
+  <nav *ngIf="totalPages > 1" class="d-flex justify-content-center mt-3">
+    <ul class="pagination">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <button class="page-link" (click)="goToPage(currentPage - 1)">&laquo;</button>
+      </li>
+      <li class="page-item disabled">
+        <span class="page-link">{{ currentPage }} / {{ totalPages }}</span>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <button class="page-link" (click)="goToPage(currentPage + 1)">&raquo;</button>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<!-- Modal de actualización de estado -->
+<div *ngIf="updatingId !== null"
+     class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+     style="background:rgba(0,0,0,0.45); z-index:1050">
+  <div class="card border-0 shadow-lg" style="width:100%; max-width:420px">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span class="fw-semibold">Actualizar estado</span>
+      <button class="btn-close" (click)="closeUpdate()"></button>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="updateForm" (ngSubmit)="submitUpdate()">
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Nuevo estado</label>
+          <select formControlName="status" class="form-select">
+            <option value="">Selecciona un estado</option>
+           <option *ngFor="let opt of getNextOptions(updatingOrder?.status ?? '')"
+        [value]="opt.value">
+          </option>
+          </select>
+        </div>
+
+        <div *ngIf="updateForm.get('status')?.value === 'shipped'" class="mb-3">
+          <label class="form-label fw-semibold">
+            Código de tracking
+            <span class="text-muted fw-normal">(opcional)</span>
+          </label>
+          <input type="text" formControlName="tracking_code"
+                 class="form-control" placeholder="Ej: TRC-123456">
+        </div>
+
+        <div *ngIf="updateError" class="alert alert-danger py-2 small">{{ updateError }}</div>
+        <div *ngIf="updateSuccess" class="alert alert-success py-2 small">{{ updateSuccess }}</div>
+
+        <div class="d-flex gap-2 justify-content-end">
+          <button type="button" class="btn btn-outline-secondary btn-sm"
+                  (click)="closeUpdate()">Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-sm"
+                  [disabled]="!updateForm.get('status')?.value || updateLoading">
+            <span *ngIf="updateLoading" class="spinner-border spinner-border-sm me-1"></span>
+            Confirmar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

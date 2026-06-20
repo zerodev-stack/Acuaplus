@@ -2,12 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../utils/AppError';
 import { logger } from '../utils/logger';
 
-export const errorHandler = (
-  err: Error,
-  _req: Request,
-  res: Response,
-  _next: NextFunction
-): void => {
+export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction): void => {
+  console.error('🔴 ERROR COMPLETO:', err.message);
+  console.error('STACK:', err.stack);
+
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
       error: {
@@ -19,12 +17,10 @@ export const errorHandler = (
     return;
   }
 
-  logger.error('Global', 'Error no manejado', err);
-
   res.status(500).json({
     error: {
-      code: 'INTERNAL_ERROR',
-      message: 'Error interno del servidor',
+      code: 'INTERNALERROR',
+      message: err.message || 'Error interno del servidor',
     },
   });
 };

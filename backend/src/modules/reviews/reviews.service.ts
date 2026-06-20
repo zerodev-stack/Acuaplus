@@ -83,8 +83,8 @@ export const getProductReviews = async (productId: number, page = 1, limit = 20)
      JOIN users u ON u.id = r.buyer_id
      WHERE r.product_id = ?
      ORDER BY r.created_at DESC
-     LIMIT ? OFFSET ?`,
-    [productId, limit, offset]
+     LIMIT ${limit} OFFSET ${offset}`,
+    [productId]
   );
 
   return {

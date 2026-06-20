@@ -1,0 +1,130 @@
+<!-- Navbar igual al del catálogo -->
+<nav class="navbar navbar-dark bg-primary shadow-sm sticky-top">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="navbar-brand fw-bold" routerLink="/">💧 Acuaplus</a>
+    <div class="d-flex gap-2">
+      <a routerLink="/cart" class="btn btn-outline-light btn-sm" *ngIf="isLoggedIn">
+        <i class="bi bi-cart"></i>
+      </a>
+      <a routerLink="/auth/login" class="btn btn-outline-light btn-sm" *ngIf="!isLoggedIn">
+        Iniciar sesión
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+  <button class="btn btn-link ps-0 mb-3" (click)="goBack()">
+    <i class="bi bi-arrow-left me-1"></i>Volver al catálogo
+  </button>
+
+  <!-- Skeleton -->
+  <div *ngIf="loading" class="row g-4 align-items-start">
+    <div class="col-12 col-md-6">
+      <div class="placeholder-glow">
+        <div class="placeholder w-100 rounded" style="height: 360px;"></div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6">
+      <div class="placeholder-glow">
+        <span class="placeholder col-7 d-block mb-3"></span>
+        <span class="placeholder col-4 d-block mb-3"></span>
+        <span class="placeholder col-10 d-block mb-2"></span>
+        <span class="placeholder col-9 d-block mb-2"></span>
+        <span class="placeholder col-5 d-block mb-3"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error && !loading" class="alert alert-warning d-flex align-items-center gap-2">
+    <i class="bi bi-exclamation-triangle"></i>
+    No se pudo cargar el producto.
+    <button class="btn btn-sm btn-warning ms-auto" (click)="goBack()">Volver</button>
+  </div>
+
+  <!-- Detalle -->
+  <div *ngIf="product && !loading" class="row g-4 align-items-start">
+    <div class="col-12 col-md-6">
+      <div class="card border-0 shadow-sm overflow-hidden">
+        <img
+          [src]="product.primaryimage?.imageurl || fallbackImage"
+          [alt]="product.name"
+          class="w-100"
+          style="height: 360px; object-fit: cover;"
+          (error)="onImageError($event)"
+        />
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <div class="d-flex flex-column gap-3">
+        <div>
+          <span class="badge bg-primary bg-opacity-10 text-primary mb-2">
+            {{ product.categoryname }}
+          </span>
+          <h3 class="fw-bold mb-2">{{ product.name }}</h3>
+          <p class="text-muted mb-0">{{ product.description }}</p>
+        </div>
+
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <span class="fs-3 fw-bold text-primary">{{ formatPrice(product.price) }}</span>
+          <span class="badge" [class]="stockBadgeClass">
+            {{ product.stock === 0 ? 'Agotado' : product.stock + ' disponibles' }}
+          </span>
+        </div>
+
+        <div class="card border-0 bg-light">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+              <div>
+                <label class="form-label fw-semibold mb-1">Cantidad</label>
+                <input type="number" min="1" [max]="product.stock" [(ngModel)]="quantity"
+                  class="form-control" style="width:110px;" [disabled]="product.stock === 0"/>
+              </div>
+              <div class="mt-4 mt-md-0">
+                <button class="btn btn-primary px-4"
+                  [disabled]="product.stock === 0 || addingToCart"
+                  (click)="addToCart()">
+                  <span *ngIf="addingToCart" class="spinner-border spinner-border-sm me-2"></span>
+                  <i *ngIf="!addingToCart" class="bi bi-cart-plus me-1"></i>
+                  {{ addingToCart ? 'Agregando...' : 'Agregar al carrito' }}
+                </button>
+              </div>
+            </div>
+            <div *ngIf="cartMessage" class="alert alert-success py-2 mt-3 mb-0 small">
+              {{ cartMessage }}
+            </div>
+            <div *ngIf="cartError" class="alert alert-danger py-2 mt-3 mb-0 small">
+              {{ cartError }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Especificaciones -->
+        <div class="card border-0 shadow-sm" *ngIf="product.specs && product.specs.length > 0">
+          <div class="card-body">
+            <h6 class="fw-bold mb-3">Especificaciones</h6>
+            <div class="row g-2 small">
+              <div *ngFor="let spec of product.specs" class="col-6">
+                <strong>{{ spec.speckey }}:</strong> {{ spec.specvalue }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="fw-bold mb-2">Información del producto</h6>
+            <div class="row g-2 small text-muted">
+              <div class="col-6"><strong>SKU:</strong> {{ product.sku || '—' }}</div>
+              <div class="col-6"><strong>Stock:</strong> {{ product.stock }}</div>
+              <div class="col-6"><strong>Categoría:</strong> {{ product.categoryname }}</div>
+              <div class="col-6"><strong>Precio:</strong> {{ formatPrice(product.price) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

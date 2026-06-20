@@ -250,7 +250,7 @@ const createTables = async () => {
     const [rows]: any = await connection.query('SELECT COUNT(*) as count FROM categories');
     if (rows[0].count === 0) {
       await connection.query(`
-        INSERT INTO categories (name, description) VALUES 
+        INSERT INTO categories (name, description) VALUES
         ('Peces de Agua Dulce', 'Peces tropicales y de agua fría para acuarios de agua dulce.'),
         ('Peces Marinos', 'Peces de arrecife y marinos para acuarios de agua salada.'),
         ('Acuarios y Peceras', 'Tanques de diferentes tamaños y formas.'),

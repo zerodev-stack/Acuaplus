@@ -7,6 +7,7 @@ import { cartRoutes } from '../modules/cart/cart.routes';
 import { orderRoutes } from '../modules/orders/orders.routes';
 import { paymentRoutes } from '../modules/payments/payments.routes';
 import { reviewRoutes } from '../modules/reviews/reviews.routes';
+import {addressRoutes} from '../modules/addresses/addresses.routes';
 import { notificationRoutes } from '../modules/notifications/notifications.routes';
 
 const router = Router();
@@ -19,6 +20,7 @@ router.use('/cart', cartRoutes);
 router.use('/orders', orderRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/reviews', reviewRoutes);
+router.use('/addresses', addressRoutes);
 router.use('/notifications', notificationRoutes);
 
 export { router as routes };

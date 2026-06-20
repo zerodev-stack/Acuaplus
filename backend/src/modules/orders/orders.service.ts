@@ -11,7 +11,9 @@ export const createOrder = async (buyerId: number, input: {
   card_id?: number;
   notes?: string;
 }) => {
-  return transaction(async (conn) => {
+  let createdOrderId: number = 0; // ← declarar fuera del transaction
+
+  await transaction(async (conn) => {
     const [carts] = await conn.execute<any[]>(
       'SELECT * FROM cart WHERE user_id = ?',
       [buyerId]
@@ -50,7 +52,6 @@ export const createOrder = async (buyerId: number, input: {
     const orderItems: any[] = [];
 
     for (const [sellerId, items] of sellerGroups) {
-      let sellerSubtotal = 0;
       for (const item of items) {
         const [productRows] = await conn.execute<any[]>(
           'SELECT stock, stock_version, price, name FROM products WHERE id = ? FOR UPDATE',
@@ -62,7 +63,6 @@ export const createOrder = async (buyerId: number, input: {
           throw new AppError(400, `Stock insuficiente para "${product.name}"`, 'INSUFFICIENT_STOCK');
         }
         const itemSubtotal = product.price * item.quantity;
-        sellerSubtotal += itemSubtotal;
         subtotalAmount += itemSubtotal;
         orderItems.push({ ...item, price: product.price, subtotal: itemSubtotal, sellerId: product.seller_id || item.seller_id });
       }
@@ -97,7 +97,6 @@ export const createOrder = async (buyerId: number, input: {
           `INSERT INTO order_items (order_id, seller_order_id, product_id, seller_id, quantity, unit_price, subtotal) VALUES (?, ?, ?, ?, ?, ?, ?)`,
           [orderId, sellerOrderId, item.product_id, sellerId, item.quantity, item.price, item.price * item.quantity]
         );
-
         await conn.execute(
           `UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?`,
           [item.quantity, item.product_id, item.quantity]
@@ -119,8 +118,11 @@ export const createOrder = async (buyerId: number, input: {
     );
 
     logger.info('Orders', 'Orden creada', { orderId, buyerId, totalAmount });
-    return getOrderById(orderId, buyerId);
+    createdOrderId = orderId;
   });
+
+  
+  return getOrderById(createdOrderId, buyerId);
 };
 
 export const getMyOrders = async (userId: number, queryParams: { page?: string; limit?: string }) => {
@@ -133,42 +135,44 @@ export const getMyOrders = async (userId: number, queryParams: { page?: string; 
   const total = countResult[0].total;
 
   const orders = await query<OrderRow[]>(
-    'SELECT * FROM orders WHERE buyer_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?',
-    [userId, limit, offset]
+    // ✅ LIMIT y OFFSET interpolados como literales numéricos
+    `SELECT * FROM orders WHERE buyer_id = ? ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`,
+    [userId]
   );
 
   const enriched = await enrichOrders(orders);
-  return paginate(enriched, total, page, limit);
+  return paginate(enriched ?? [], total, page, limit);
 };
 
 export const getOrderById = async (orderId: number, userId?: number) => {
   const orders = await query<OrderRow[]>(
-    'SELECT * FROM orders WHERE id = ?',
+    `SELECT * FROM orders WHERE id = ?`,
     [orderId]
   );
   if (orders.length === 0) throw new AppError(404, 'Orden no encontrada', 'ORDER_NOT_FOUND');
+  
   const order = orders[0];
 
   if (userId && order.buyer_id !== userId) {
-    const sellerCheck = await query<{ id: number }[]>(
+    const sellerCheck = await query<{id: number}[]>(
       `SELECT so.id FROM seller_orders so
-       JOIN seller_profiles sp ON sp.id = so.seller_id
+       JOIN seller_profiles sp ON sp.user_id = so.seller_id
        WHERE so.order_id = ? AND sp.user_id = ?`,
       [orderId, userId]
     );
-    if (sellerCheck.length === 0) {
+    if (sellerCheck.length === 0)
       throw new AppError(403, 'No tienes acceso a esta orden', 'FORBIDDEN');
-    }
   }
 
-  const enriched = (await enrichOrders([order]))[0];
-  return enriched;
+
+  const enriched = await enrichOrders([order]);
+  return enriched[0]; // ← devolver solo el primero
 };
 
 export const updateSellerOrderStatus = async (sellerOrderId: number, userId: number, input: { status: string; tracking_code?: string }) => {
   const sellerOrders = await query<(SellerOrderRow & { sp_user_id: number })[]>(
     `SELECT so.*, sp.user_id as sp_user_id FROM seller_orders so
-     JOIN seller_profiles sp ON sp.id = so.seller_id
+     JOIN seller_profiles sp ON sp.user_id = so.seller_id
      WHERE so.id = ?`,
     [sellerOrderId]
   );
@@ -231,25 +235,25 @@ export const getSellerOrders = async (userId: number, queryParams: { page?: stri
   );
 
   const sellerOrders = await query<SellerOrderRow[]>(
-    `SELECT so.* FROM seller_orders so
-     JOIN seller_profiles sp ON sp.id = so.seller_id
-     WHERE ${where}
-     ORDER BY so.created_at DESC LIMIT ? OFFSET ?`,
-    [...params, limit, offset]
-  );
+  `SELECT so.* FROM seller_orders so
+   JOIN seller_profiles sp ON sp.user_id = so.seller_id
+   WHERE ${where}
+   ORDER BY so.created_at DESC LIMIT ${limit} OFFSET ${offset}`,
+  // ✅ Sin limit/offset en el array
+  params
+);
 
   return paginate(sellerOrders, countResult[0].total, page, limit);
 };
 
 const enrichOrders = async (orders: OrderRow[]) => {
-  if (orders.length === 0) return [];
-
+  if (orders.length === 0) return []; // ← siempre retornar array
+  
   const orderIds = orders.map(o => o.id);
-
   const sellerOrders = await query<any[]>(
-    `SELECT so.*, sp.business_name, sp.user_id as seller_user_id
+    `SELECT so.*, sp.business_name, sp.user_id AS seller_user_id
      FROM seller_orders so
-     JOIN seller_profiles sp ON sp.id = so.seller_id
+     JOIN seller_profiles sp ON sp.user_id = so.seller_id
      WHERE so.order_id IN (${orderIds.map(() => '?').join(',')})`,
     orderIds
   );
