@@ -84,18 +84,16 @@ export interface ProductFilters {
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  private baseUrl = 'http://149.130.173.252:4000/api';
-
   constructor(
     private api: ApiService,
-    private http: HttpClient
   ) {}
 
   private toAbsoluteImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  if (url.startsWith('/')) return `${this.baseUrl.replace('/api', '')}${url}`;
-  return `${this.baseUrl.replace('/api', '')}/${url}`;
+  const baseUrl = this.api.getBaseUrl();
+  if (url.startsWith('/')) return `${baseUrl.replace('/api', '')}${url}`;
+  return `${baseUrl.replace('/api', '')}/${url}`;
 }
 private mapImage(image: any): ProductImage {
   return {

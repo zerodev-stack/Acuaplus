@@ -7,6 +7,10 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
+  getBaseUrl() {
+    return this.baseUrl;
+  }
+
   get<T>(path: string) {
     return this.http.get<T>(`${this.baseUrl}/${path}`, { withCredentials: true });
   }
