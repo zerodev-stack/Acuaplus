@@ -13,10 +13,10 @@ const app = express();
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({
-  origin: true,
+  origin: env.FRONTEND_URL,
   credentials: true,
 }));
-app.use(morgan('dev'));
+app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
