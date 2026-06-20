@@ -84,7 +84,7 @@ export interface ProductFilters {
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  private baseUrl = 'http://localhost:4000/api';
+  private baseUrl = 'http://149.130.173.252:4000/api';
 
   constructor(
     private api: ApiService,
